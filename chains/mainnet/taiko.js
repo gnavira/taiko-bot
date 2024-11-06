@@ -3,6 +3,11 @@ const { JsonRpcProvider } = require('ethers');
 
 const rpcProviders = [  
   new JsonRpcProvider('https://rpc.mainnet.taiko.xyz'), 
+  new JsonRpcProvider('https://rpc.ankr.com/taiko'), 
+  new JsonRpcProvider('https://rpc.taiko.xyz'), 
+  new JsonRpcProvider('https://taiko-rpc.publicnode.com'),
+  new JsonRpcProvider('https://taiko-mainnet.rpc.porters.xyz/taiko-public'),
+  new JsonRpcProvider('https://taiko.drpc.org'),
 ];
 
 let currentRpcProviderIndex = 0;  
@@ -11,7 +16,7 @@ function provider() {
   return rpcProviders[currentRpcProviderIndex];  
 }  
   
-function rotateRpcProvider() {  
+function changeRpcProvider() {  
   currentRpcProviderIndex = (currentRpcProviderIndex + 1) % rpcProviders.length;  
   return provider();  
 }
@@ -19,8 +24,6 @@ function rotateRpcProvider() {
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 const baseExplorerUrl = 'https://taikoscan.io';
-
-// Fungsi utama untuk merujuk ke explorer
 const explorer = {
   get tx() {
     return (txHash) => `${baseExplorerUrl}/tx/${txHash}`;
@@ -50,4 +53,4 @@ async function ticker() {
     return 'Unknown';
   }
 }
-module.exports = { rotateRpcProvider, provider, PRIVATE_KEY, explorer, ticker };
+module.exports = { changeRpcProvider, provider, PRIVATE_KEY, explorer, ticker };
