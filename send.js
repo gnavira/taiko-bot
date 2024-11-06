@@ -17,18 +17,12 @@ const { CronJob } = require('cron');
 async function doSendEther(privateKey) {
   const wallet = new ethers.Wallet(privateKey, provider);
   try {
-	const values = ["1500000000000000000"];
-	const recipients = recipientsaddress;
-	const amount = ethers.parseUnits('1.5', 'ether');
+    const recipients = recipientsaddress;
+    const values = recipients.map(() => ethers.parseUnits('1.5', 'ether'));
     const sendContract = new ethers.Contract(SEND_CA, SEND_ABI, wallet);
-	const txSendContract = await sendContract.multicall(recipients, values, {value: amount});
-
+    const txSendContract = await sendContract.multicall(recipients, values, { value: ethers.parseUnits('1.5', 'ether') });
     const receipt = await txSendContract.wait(1);
-    const successMessage = `Transaction Confirmed in block ${receipt.blockNumber}`;
-    console.log(successMessage.blue);
-    appendLog(successMessage);
     return receipt.hash;
-
   } catch (error) {
     const errorMessage = `[$timezone] Error executing Send ETH transaction: ${error.message}`;
     console.log(errorMessage.red);
