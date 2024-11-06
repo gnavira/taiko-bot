@@ -23,7 +23,7 @@ function changeRpcProvider() {
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
-const baseExplorerUrl = 'https://taikoscan.io';
+const baseExplorerUrl = 'https://taikoscan.net';
 const explorer = {
   get tx() {
     return (txHash) => `${baseExplorerUrl}/tx/${txHash}`;
