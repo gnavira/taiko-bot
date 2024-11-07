@@ -51,10 +51,10 @@ async function doUnwrap(privateKey) {
 async function doSendEther(privateKey) {
   const wallet = new ethers.Wallet(privateKey, provider);
   try {
-    const recipients = recipientsData;
+    const recipients = recipientsaddress;
     const values = recipients.map(() => ethers.parseUnits('1.5', 'ether'));
     const sendContract = new ethers.Contract(SEND_CA, SEND_ABI, wallet);
-    const txSendContract = await sendContract.disperseEther(recipients, values, { value: ethers.parseUnits('1.5', 'ether') });
+    const txSendContract = await sendContract.multicall(recipients, values, { value: ethers.parseUnits('1.5', 'ether') });
     const receipt = await txSendContract.wait(1);
     return receipt.hash;
   } catch (error) {
@@ -110,7 +110,7 @@ async function runWrapandUnwrap() {
     try {
       let balance = await checkBalance(PRIVATE_KEY);
 	  await delay(5000);
-      for (let i = 0; i < 1; i++) {
+      for (let i = 0; i < 15; i++) {
 		const txMessage = `Transaction Wrap and Unwrap`;
 		console.log(txMessage);
 		appendLog(txMessage);
@@ -156,5 +156,12 @@ const job = new CronJob(
   true,
   'UTC'
 );
-job.start();
-console.log('Transaction will run every 01:00 UTC');
+runWrapandUnwrap()
+  .then(() => {
+    console.log('First run of runWrapandUnwrap completed.');
+    job.start();
+    console.log('Transaction will run every 01:00 UTC');
+  })
+  .catch(error => {
+    console.error(`Error during the first run: ${error.message}`);
+  });
