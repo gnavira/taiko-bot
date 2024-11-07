@@ -13,40 +13,40 @@ const SEND_CA = '0x2A5b0a407828b6Ca2E87e2e568CD8413fd5c24A1';
 const recipientsaddress = JSON.parse(fs.readFileSync('recipients.json', 'utf8'));
 const { CronJob } = require('cron');
 const amountCheck = ethers.parseEther('1', 'ether');
+
 function appendLog(message) {
   fs.appendFileSync('log.txt', message + '\n');
 }
+
 async function doWrap(privateKey) {
   const wallet = new ethers.Wallet(privateKey, provider);
   try {
-	const amount = ethers.parseUnits('1.5', 'ether');
+    const amount = ethers.parseUnits('1.5', 'ether');
     const wrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
-    const txWrap = await wrapContract.deposit({ value: amount});
+    const txWrap = await wrapContract.deposit({ value: amount });
     const receipt = await txWrap.wait(1);
     return receipt.hash;
-
   } catch (error) {
     const errorMessage = `[$timezone] Error executing transaction: ${error.message}`;
     console.log(errorMessage.red);
     appendLog(errorMessage);
   }
 }
+
 async function doUnwrap(privateKey) {
   const wallet = new ethers.Wallet(privateKey, provider);
   try {
-	const amount = ethers.parseUnits('1.5', 'ether');
+    const amount = ethers.parseUnits('1.5', 'ether');
     const unwrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
     const txUnwrap = await unwrapContract.withdraw(amount);
     const receipt = await txUnwrap.wait(1);
     return receipt.hash;
-
   } catch (error) {
     const errorMessage = `[$timezone] Error executing transaction: ${error.message}`;
     console.log(errorMessage.red);
     appendLog(errorMessage);
   }
 }
-
 
 async function doSendEther(privateKey) {
   const wallet = new ethers.Wallet(privateKey, provider);
@@ -63,32 +63,38 @@ async function doSendEther(privateKey) {
     appendLog(errorMessage);
   }
 }
+
 async function checkBalance(privateKey) {
   let tempProvider = provider;
   const wallet = new ethers.Wallet(privateKey, tempProvider);
   const address = await wallet.getAddress();
   let balance = await tempProvider.getBalance(address);
-  
+
   const loadingSymbols = ['|', '/', '-', '\\'];
   let index = 0;
   const loadingInterval = setInterval(() => {
     process.stdout.write(`\rChecking balance for ${address}... ${loadingSymbols[index]}`);
     index = (index + 1) % loadingSymbols.length;
   }, 200);
+
   while (balance <= amountCheck) {
     try {
-	  await delay(5000);
+      await delay(5000);
       balance = await tempProvider.getBalance(address);
     } catch (error) {
       if (error.message.includes('504 Gateway Timeout')) {
-        console.log(`\nRPC Error: 504 Gateway Timeout. Retrying with another RPC... `);
+        console.log(`\nRPC Error: 504 Gateway Timeout. Retrying with another RPC...`);
+        tempProvider = changeRpc();
+        continue;
+      } else if (error.message.toLowerCase().includes('timeout')) {
+        console.log(`\nRequest Timeout Error. Retrying with another RPC...`);
         tempProvider = changeRpc();
         continue;
       } else {
         const errorMessage = `[$timezone] Error checking balance: ${error.message}`;
         console.log(errorMessage.red);
         appendLog(errorMessage);
-        break;
+        process.exit(0);
       }
     }
     await delay(5000);
@@ -100,20 +106,22 @@ async function checkBalance(privateKey) {
   console.log(`Wallet address: ${address}`);
   console.log(`Balance: ${ethers.formatEther(balance)} ETH`);
   console.log('');
+
   tempProvider = provider;
   return balance;
 }
+
 async function runWrapandUnwrap() {
   displayHeader();
   const timezone = moment().tz('Asia/Jakarta').format('HH:mm:ss [WIB] DD-MM-YYYY');
   for (const PRIVATE_KEY of PRIVATE_KEYS) {
     try {
       let balance = await checkBalance(PRIVATE_KEY);
-	  await delay(5000);
+      await delay(5000);
       for (let i = 0; i < 15; i++) {
-		const txMessage = `Transaction Wrap and Unwrap`;
-		console.log(txMessage);
-		appendLog(txMessage);
+        const txMessage = `Transaction Wrap and Unwrap`;
+        console.log(txMessage);
+        appendLog(txMessage);
         const receiptTx = await doWrap(PRIVATE_KEY);
         if (receiptTx) {
           const successMessage = `[${timezone}] Transaction Wrap: ${explorer.tx(receiptTx)}`;
@@ -128,18 +136,17 @@ async function runWrapandUnwrap() {
           appendLog(successMessage);
         }
       }
-	  await delay(5000);
-	  const sendMessage = `Transaction Send ETH`;
-	  console.log(sendMessage);
-	  appendLog(sendMessage);
+      await delay(5000);
+      const sendMessage = `Transaction Send ETH`;
+      console.log(sendMessage);
+      appendLog(sendMessage);
       const receiptTxSend = await doSendEther(PRIVATE_KEY);
       if (receiptTxSend) {
         const successMessage = `[${timezone}] Transaction Send ETH: ${explorer.tx(receiptTxSend)}`;
         console.log(successMessage.cyan);
         appendLog(successMessage);
       }
-	  console.log('');
-
+      console.log('');
     } catch (error) {
       const errorMessage = `[${timezone}] Error processing transaction. Details: ${error.message}`;
       console.log(errorMessage.red);
@@ -149,6 +156,7 @@ async function runWrapandUnwrap() {
     }
   }
 }
+
 const job = new CronJob(
   '0 1 * * *',
   runWrapandUnwrap,
@@ -156,6 +164,7 @@ const job = new CronJob(
   true,
   'UTC'
 );
+
 runWrapandUnwrap()
   .then(() => {
     console.log('First run of runWrapandUnwrap completed.');
