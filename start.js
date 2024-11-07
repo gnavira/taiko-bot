@@ -2,7 +2,8 @@ const { ethers } = require('ethers');
 const chains = require('./chains');
 const provider = chains.mainnet.taiko.provider();
 const explorer = chains.mainnet.taiko.explorer;
-const changeRpc = chains.mainnet.taiko.changeRpcProvider;
+const changeRpc = chains.mainnet.tempTaiko.changeRpcProvider;
+const tempProvider = chains.mainnet.tempTaiko.provider();
 const fs = require('fs');
 const moment = require('moment-timezone');
 const { displayHeader, delay } = require('./chains/utils/utils');
@@ -65,7 +66,6 @@ async function doSendEther(privateKey) {
 }
 
 async function checkBalance(privateKey) {
-  let tempProvider = provider;
   const wallet = new ethers.Wallet(privateKey, tempProvider);
   const address = await wallet.getAddress();
   let balance = await tempProvider.getBalance(address);
@@ -106,8 +106,6 @@ async function checkBalance(privateKey) {
   console.log(`Wallet address: ${address}`);
   console.log(`Balance: ${ethers.formatEther(balance)} ETH`);
   console.log('');
-
-  tempProvider = provider;
   return balance;
 }
 
@@ -156,7 +154,6 @@ async function runWrapandUnwrap() {
     }
   }
 }
-
 const job = new CronJob(
   '0 1 * * *',
   runWrapandUnwrap,
