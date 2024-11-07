@@ -97,7 +97,7 @@ async function checkBalance(privateKey) {
         process.exit(0);
       }
     }
-    await delay(5000);
+    await delay(30000);
   }
 
   clearInterval(loadingInterval);
