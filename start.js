@@ -210,7 +210,7 @@ async function checkBalanceDeposit(privateKey) {
 
   clearInterval(loadingInterval);
   process.stdout.write('\r');
-  console.log(`${ethers.formatEther(balance)} ETH`.blue);
+  console.log(`${ethers.formatEther(balanceDeposit)} ETH`.blue);
   console.log('');
   return balanceDeposit;
 }
