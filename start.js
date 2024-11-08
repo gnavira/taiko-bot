@@ -180,7 +180,7 @@ async function checkBalanceDeposit(privateKey) {
   while (balanceDeposit <= amountCheck) {
     try {
       await delay(5000);
-      balance = await tempProvider.getBalance(address);
+      balanceDeposit = await tempProvider.getBalance(address);
     } catch (error) {
       if (error.message.includes('504 Gateway Timeout')) {
         console.log(`\nRPC Error: 504 Gateway Timeout. Retrying with another RPC...`);
