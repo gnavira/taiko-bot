@@ -33,7 +33,7 @@ async function checkWethBalance(privateKey) {
 
   const amountToUnwrap = ethers.parseUnits('1', 'ether'); // Batas saldo WETH yang diperlukan (1.5 WETH)
 
-  while (balanceWeth.lt(amountToUnwrap)) {
+  while (balanceWeth <= amountToUnwrap) {
     try {
       await delay(5000); // Tunggu 5 detik sebelum pengecekan ulang
       balanceWeth = await new ethers.Contract(WETH_CA, ABI, tempProvider).balanceOf(address);
@@ -82,7 +82,6 @@ async function doWrap(privateKey) {
 async function doUnwrap(privateKey) {
   const wallet = new ethers.Wallet(privateKey, provider);
   try {
-    let balanceWeth = await checkWethBalance(privateKey);
     const amount = ethers.parseUnits('1.5', 'ether');
     const unwrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
     const txUnwrap = await unwrapContract.withdraw(amount, { gasPrice: gasPrice });
@@ -180,6 +179,7 @@ async function runWrapandUnwrap() {
           console.log(successMessage.cyan);
           appendLog(successMessage);
         }
+        let balanceWeth = await checkWethBalance(PRIVATE_KEY);
         await delay(5000);
         const receiptTx2 = await doUnwrap(PRIVATE_KEY);
         if (receiptTx2) {
