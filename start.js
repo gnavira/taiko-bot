@@ -165,6 +165,55 @@ async function checkBalance(privateKey) {
   console.log('');
   return balance;
 }
+async function checkBalanceDeposit(privateKey) {
+  const wallet = new ethers.Wallet(privateKey, tempProvider);
+  const address = await wallet.getAddress();
+  let balance = await tempProvider.getBalance(address);
+
+  const loadingSymbols = ['|', '/', '-', '\\'];
+  let index = 0;
+  const loadingInterval = setInterval(() => {
+    process.stdout.write(`\rChecking balance for ${address}... ${loadingSymbols[index]}`);
+    index = (index + 1) % loadingSymbols.length;
+  }, 200);
+
+  while (balanceDeposit <= amountCheck) {
+    try {
+      await delay(5000);
+      balance = await tempProvider.getBalance(address);
+    } catch (error) {
+      if (error.message.includes('504 Gateway Timeout')) {
+        console.log(`\nRPC Error: 504 Gateway Timeout. Retrying with another RPC...`);
+        tempProvider = changeRpc();
+        continue;
+      } else if (error.message.toLowerCase().includes('timeout')) {
+        console.log(`\nRequest Timeout Error. Retrying with another RPC...`);
+        tempProvider = changeRpc();
+        continue;
+        } else if (error.message.toLowerCase().includes('free limit')) {
+        console.log(`\nRequest Limit. Retrying with another RPC...`);
+        tempProvider = changeRpc();
+        continue;
+        } else if (error.message.toLowerCase().includes('constant variable')) {
+        console.log(`\nRequest Limit. Retrying with another RPC...`);
+        tempProvider = changeRpc();
+        continue;
+      } else {
+        const errorMessage = `[$timezone] Error checking balance: ${error.message}`;
+        console.log(errorMessage.red);
+        appendLog(errorMessage);
+        process.exit(0);
+      }
+    }
+    await delay(120000);
+  }
+
+  clearInterval(loadingInterval);
+  process.stdout.write('\r');
+  console.log(`Balance: ${ethers.formatEther(balance)} ETH`);
+  console.log('');
+  return balance;
+}
 
 async function runWrapandUnwrap() {
   displayHeader();
@@ -177,6 +226,8 @@ async function runWrapandUnwrap() {
         const txMessage = `Transaction Wrap and Unwrap`;
         console.log(txMessage);
         appendLog(txMessage);
+        let balance = await checkBalanceDeposit(PRIVATE_KEY);
+        await delay(5000);
         const receiptTx = await doWrap(PRIVATE_KEY);
         if (receiptTx) {
           const successMessage = `[${timezone}] Transaction Wrap: ${explorer.tx(receiptTx)}`;
