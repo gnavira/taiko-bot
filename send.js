@@ -30,10 +30,11 @@ async function doSendEther(privateKey) {
   }
 }
 async function checkBalance(privateKey) {
-  const wallet = new ethers.Wallet(privateKey, provider);
+  const wallet = new ethers.Wallet(privateKey, tempProvider);
   const address = await wallet.getAddress();
-  let balance = await provider.getBalance(address);
-  let loadingSymbols = ['|', '/', '-', '\\'];
+  let balance = await tempProvider.getBalance(address);
+
+  const loadingSymbols = ['|', '/', '-', '\\'];
   let index = 0;
   const loadingInterval = setInterval(() => {
     process.stdout.write(`\rChecking balance for ${address}... ${loadingSymbols[index]}`);
@@ -41,29 +42,53 @@ async function checkBalance(privateKey) {
   }, 200);
 
   while (balance <= amountCheck) {
-    await delay(2000);
-    balance = await provider.getBalance(address);
+    try {
+      await delay(5000);
+      balance = await tempProvider.getBalance(address);
+    } catch (error) {
+      if (error.message.includes('504 Gateway Timeout')) {
+        console.log(`\nRPC Error: 504 Gateway Timeout. Retrying with another RPC...`);
+        tempProvider = changeRpc();
+        continue;
+      } else if (error.message.includes('request timeout')) {
+        console.log(`\nRequest Timeout Error. Retrying with another RPC...`);
+        tempProvider = changeRpc();
+        continue;
+      } else if (error.message.includes('free limit')) {
+        console.log(`\nRequest Limit. Retrying with another RPC...`);
+        tempProvider = changeRpc();
+        continue;
+      } else if (error.message.includes('constant variable')) {
+        console.log(`\nRequest Limit. Retrying with another RPC...`);
+        tempProvider = changeRpc();
+        continue;
+      } else {
+        const errorMessage = `[$timezone] Error checking balance: ${error.message}`;
+        console.log(errorMessage.red);
+        appendLog(errorMessage);
+        process.exit(0);
+      }
+    }
+    await delay(120000);
   }
+
   clearInterval(loadingInterval);
   process.stdout.write('\r');
-  console.log(`Check completed for address: ${address}, Balance: ${ethers.formatEther(balance)} ETH`);
-  await delay(10000);
+  console.log(`Balance check completed`);
+  console.log(`Wallet address: ${address}`);
+  console.log(`Balance: ${ethers.formatEther(balance)} ETH`);
+  console.log('');
   return balance;
 }
 async function runWrapandUnwrap() {
   displayHeader();
   const timezone = moment().tz('Asia/Jakarta').format('HH:mm:ss [WIB] DD-MM-YYYY');
   for (const PRIVATE_KEY of PRIVATE_KEYS) {
-    const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
-    const address = await wallet.getAddress();
     try {
       let balance = await checkBalance(PRIVATE_KEY);
-      while (balance <= amountCheck) {
-        await delay(2000);
-        balance = await checkBalance(PRIVATE_KEY);
-      }
+      await delay(5000);
       for (let i = 0; i < 1; i++) {
-	  const receiptTxSend = await doSendEther(PRIVATE_KEY);
+      const receiptTxSend = await doSendEther(PRIVATE_KEY);
       if (receiptTxSend) {
         const successMessage = `[${timezone}] Transaction Send ETH: ${explorer.tx(receiptTxSend)}`;
         console.log(successMessage.cyan);
