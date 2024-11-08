@@ -226,7 +226,7 @@ async function runWrapandUnwrap() {
         const txMessage = `Transaction Wrap and Unwrap`;
         console.log(txMessage);
         appendLog(txMessage);
-        let balance = await checkBalanceDeposit(PRIVATE_KEY);
+        let balanceDeposit = await checkBalanceDeposit(PRIVATE_KEY);
         await delay(5000);
         const receiptTx = await doWrap(PRIVATE_KEY);
         if (receiptTx) {
