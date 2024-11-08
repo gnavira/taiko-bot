@@ -91,6 +91,10 @@ async function checkBalance(privateKey) {
         console.log(`\nRequest Timeout Error. Retrying with another RPC...`);
         tempProvider = changeRpc();
         continue;
+        } else if (error.message.toLowerCase().includes('free limit')) {
+        console.log(`\nRequest Limit. Retrying with another RPC...`);
+        tempProvider = changeRpc();
+        continue;
       } else {
         const errorMessage = `[$timezone] Error checking balance: ${error.message}`;
         console.log(errorMessage.red);
