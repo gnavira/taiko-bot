@@ -95,6 +95,10 @@ async function checkBalance(privateKey) {
         console.log(`\nRequest Limit. Retrying with another RPC...`);
         tempProvider = changeRpc();
         continue;
+        } else if (error.message.toLowerCase().includes('constarnt variable')) {
+        console.log(`\nRequest Limit. Retrying with another RPC...`);
+        tempProvider = changeRpc();
+        continue;
       } else {
         const errorMessage = `[$timezone] Error checking balance: ${error.message}`;
         console.log(errorMessage.red);
@@ -166,12 +170,5 @@ const job = new CronJob(
   true,
   'UTC'
 );
-runWrapandUnwrap()
-  .then(() => {
-    console.log('First run of runWrapandUnwrap completed.');
-    job.start();
-    console.log('Transaction will run every 01:00 UTC');
-  })
-  .catch(error => {
-    console.error(`Error during the first run: ${error.message}`);
-  });
+job.start();
+console.log('Transaction will run every 01:00 UTC');
