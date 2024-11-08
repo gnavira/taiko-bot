@@ -64,7 +64,7 @@ async function checkWethBalance(privateKey) {
 
   clearInterval(loadingInterval);
   process.stdout.write('\r');
-  console.log(`WETH Balance: ${ethers.formatEther(balanceWeth)} WETH`);
+  console.log(`${ethers.formatEther(balanceWeth)} WETH`.blue);
   return balanceWeth;
 }
 
@@ -168,7 +168,7 @@ async function checkBalance(privateKey) {
 async function checkBalanceDeposit(privateKey) {
   const wallet = new ethers.Wallet(privateKey, tempProvider);
   const address = await wallet.getAddress();
-  let balance = await tempProvider.getBalance(address);
+  let balanceDeposit = await tempProvider.getBalance(address);
 
   const loadingSymbols = ['|', '/', '-', '\\'];
   let index = 0;
@@ -210,7 +210,7 @@ async function checkBalanceDeposit(privateKey) {
 
   clearInterval(loadingInterval);
   process.stdout.write('\r');
-  console.log(`Balance: ${ethers.formatEther(balance)} ETH`);
+  console.log(`${ethers.formatEther(balance)} ETH`.blue);
   console.log('');
   return balance;
 }
