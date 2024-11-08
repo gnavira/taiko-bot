@@ -14,6 +14,7 @@ const SEND_CA = '0x2A5b0a407828b6Ca2E87e2e568CD8413fd5c24A1';
 const recipientsaddress = JSON.parse(fs.readFileSync('recipients.json', 'utf8'));
 const { CronJob } = require('cron');
 const amountCheck = ethers.parseEther('1', 'ether');
+const gasPrice = ethers.parseUnits('0.2', 'gwei');
 
 function appendLog(message) {
   fs.appendFileSync('log.txt', message + '\n');
@@ -24,7 +25,7 @@ async function doWrap(privateKey) {
   try {
     const amount = ethers.parseUnits('1.5', 'ether');
     const wrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
-    const txWrap = await wrapContract.deposit({ value: amount });
+    const txWrap = await wrapContract.deposit({ value: amount, gasPrice: gasPrice });
     const receipt = await txWrap.wait(1);
     return receipt.hash;
   } catch (error) {
@@ -39,7 +40,7 @@ async function doUnwrap(privateKey) {
   try {
     const amount = ethers.parseUnits('1.5', 'ether');
     const unwrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
-    const txUnwrap = await unwrapContract.withdraw(amount);
+    const txUnwrap = await unwrapContract.withdraw(amount, { gasPrice: gasPrice });
     const receipt = await txUnwrap.wait(1);
     return receipt.hash;
   } catch (error) {
@@ -55,7 +56,7 @@ async function doSendEther(privateKey) {
     const recipients = recipientsaddress;
     const values = recipients.map(() => ethers.parseUnits('1.5', 'ether'));
     const sendContract = new ethers.Contract(SEND_CA, SEND_ABI, wallet);
-    const txSendContract = await sendContract.multicall(recipients, values, { value: ethers.parseUnits('1.5', 'ether') });
+    const txSendContract = await sendContract.multicall(recipients, values, { value: ethers.parseUnits('1.5', 'ether'), gasPrice: gasPrice} });
     const receipt = await txSendContract.wait(1);
     return receipt.hash;
   } catch (error) {
