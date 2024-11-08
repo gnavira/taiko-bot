@@ -212,7 +212,7 @@ async function checkBalanceDeposit(privateKey) {
   process.stdout.write('\r');
   console.log(`${ethers.formatEther(balance)} ETH`.blue);
   console.log('');
-  return balance;
+  return balanceDeposit;
 }
 
 async function runWrapandUnwrap() {
