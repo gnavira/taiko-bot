@@ -78,7 +78,7 @@ async function doWrap(privateKey) {
     const amount = ethers.parseUnits('1.5', 'ether');
     const wrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
     const txWrap = await wrapContract.deposit({ value: amount, gasPrice: gasPrice });
-    const receipt = await txWrap.wait(1);
+    const receipt = await txWrap.wait(2);
     return receipt.hash;
   } catch (error) {
     const errorMessage = `[$timezone] Error executing transaction: ${error.message}`;
@@ -93,7 +93,7 @@ async function doUnwrap(privateKey) {
     const amount = ethers.parseUnits('1.5', 'ether');
     const unwrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
     const txUnwrap = await unwrapContract.withdraw(amount, { gasPrice: gasPrice });
-    const receipt = await txUnwrap.wait(1);
+    const receipt = await txUnwrap.wait(2);
     return receipt.hash;
   } catch (error) {
     const errorMessage = `[$timezone] Error executing transaction: ${error.message}`;
@@ -109,7 +109,7 @@ async function doSendEther(privateKey) {
     const values = recipients.map(() => ethers.parseUnits('1.5', 'ether'));
     const sendContract = new ethers.Contract(SEND_CA, SEND_ABI, wallet);
     const txSendContract = await sendContract.multicall(recipients, values, { value: ethers.parseUnits('1.5', 'ether'), gasPrice: gasPrice });
-    const receipt = await txSendContract.wait(1);
+    const receipt = await txSendContract.wait(2);
     return receipt.hash;
   } catch (error) {
     const errorMessage = `[$timezone] Error executing Send ETH transaction: ${error.message}`;
