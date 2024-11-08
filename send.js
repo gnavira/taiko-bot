@@ -2,6 +2,7 @@ const { ethers } = require('ethers');
 const chains = require('./chains');
 const provider = chains.mainnet.taiko.provider();
 const explorer = chains.mainnet.taiko.explorer;
+let tempProvider = chains.mainnet.tempTaiko.provider();
 const fs = require('fs');
 const moment = require('moment-timezone');
 const { displayHeader, delay } = require('./chains/utils/utils');
