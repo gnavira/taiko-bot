@@ -42,11 +42,15 @@ async function checkWethBalance(privateKey) {
         console.log(`\nRPC Error: 504 Gateway Timeout. Retrying with another RPC...`);
         tempProvider = changeRpc();
         continue;
-      } else if (error.message.toLowerCase().includes('timeout')) {
+      } else if (error.message.includes('request timeout')) {
         console.log(`\nRequest Timeout Error. Retrying with another RPC...`);
         tempProvider = changeRpc();
         continue;
-        } else if (error.message.toLowerCase().includes('constant variable')) {
+      } else if (error.message.includes('free limit')) {
+        console.log(`\nRequest Limit. Retrying with another RPC...`);
+        tempProvider = changeRpc();
+        continue;
+      } else if (error.message.includes('constant variable')) {
         console.log(`\nRequest Limit. Retrying with another RPC...`);
         tempProvider = changeRpc();
         continue;
@@ -135,15 +139,15 @@ async function checkBalance(privateKey) {
         console.log(`\nRPC Error: 504 Gateway Timeout. Retrying with another RPC...`);
         tempProvider = changeRpc();
         continue;
-      } else if (error.message.toLowerCase().includes('timeout')) {
+      } else if (error.message.includes('request timeout')) {
         console.log(`\nRequest Timeout Error. Retrying with another RPC...`);
         tempProvider = changeRpc();
         continue;
-        } else if (error.message.toLowerCase().includes('free limit')) {
+      } else if (error.message.includes('free limit')) {
         console.log(`\nRequest Limit. Retrying with another RPC...`);
         tempProvider = changeRpc();
         continue;
-        } else if (error.message.toLowerCase().includes('constant variable')) {
+      } else if (error.message.includes('constant variable')) {
         console.log(`\nRequest Limit. Retrying with another RPC...`);
         tempProvider = changeRpc();
         continue;
@@ -186,15 +190,15 @@ async function checkBalanceDeposit(privateKey) {
         console.log(`\nRPC Error: 504 Gateway Timeout. Retrying with another RPC...`);
         tempProvider = changeRpc();
         continue;
-      } else if (error.message.toLowerCase().includes('timeout')) {
+      } else if (error.message.includes('request timeout')) {
         console.log(`\nRequest Timeout Error. Retrying with another RPC...`);
         tempProvider = changeRpc();
         continue;
-        } else if (error.message.toLowerCase().includes('free limit')) {
+      } else if (error.message.includes('free limit')) {
         console.log(`\nRequest Limit. Retrying with another RPC...`);
         tempProvider = changeRpc();
         continue;
-        } else if (error.message.toLowerCase().includes('constant variable')) {
+      } else if (error.message.includes('constant variable')) {
         console.log(`\nRequest Limit. Retrying with another RPC...`);
         tempProvider = changeRpc();
         continue;
