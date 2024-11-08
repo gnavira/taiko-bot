@@ -205,7 +205,7 @@ async function checkBalanceDeposit(privateKey) {
         process.exit(0);
       }
     }
-    await delay(120000);
+    await delay(5000);
   }
 
   clearInterval(loadingInterval);
