@@ -272,5 +272,3 @@ const job = new CronJob(
 );
 job.start();
 console.log('Transaction will run every 01:00 UTC');
-})
-
