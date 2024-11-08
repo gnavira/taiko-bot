@@ -46,6 +46,10 @@ async function checkWethBalance(privateKey) {
         console.log(`\nRequest Timeout Error. Retrying with another RPC...`);
         tempProvider = changeRpc();
         continue;
+        } else if (error.message.toLowerCase().includes('constant variable')) {
+        console.log(`\nRequest Limit. Retrying with another RPC...`);
+        tempProvider = changeRpc();
+        continue;
       } else {
         const errorMessage = `[${
           moment().tz('Asia/Jakarta').format('HH:mm:ss [WIB] DD-MM-YYYY')
@@ -139,7 +143,7 @@ async function checkBalance(privateKey) {
         console.log(`\nRequest Limit. Retrying with another RPC...`);
         tempProvider = changeRpc();
         continue;
-        } else if (error.message.toLowerCase().includes('constarnt variable')) {
+        } else if (error.message.toLowerCase().includes('constant variable')) {
         console.log(`\nRequest Limit. Retrying with another RPC...`);
         tempProvider = changeRpc();
         continue;
