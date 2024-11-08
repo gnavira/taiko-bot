@@ -56,7 +56,7 @@ async function doSendEther(privateKey) {
     const recipients = recipientsaddress;
     const values = recipients.map(() => ethers.parseUnits('1.5', 'ether'));
     const sendContract = new ethers.Contract(SEND_CA, SEND_ABI, wallet);
-    const txSendContract = await sendContract.multicall(recipients, values, { value: ethers.parseUnits('1.5', 'ether'), gasPrice: gasPrice} });
+    const txSendContract = await sendContract.multicall(recipients, values, { value: ethers.parseUnits('1.5', 'ether'), gasPrice: gasPrice });
     const receipt = await txSendContract.wait(1);
     return receipt.hash;
   } catch (error) {
