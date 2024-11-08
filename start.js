@@ -19,6 +19,50 @@ const gasPrice = ethers.parseUnits('0.2', 'gwei');
 function appendLog(message) {
   fs.appendFileSync('log.txt', message + '\n');
 }
+async function checkWethBalance(privateKey) {
+  const wallet = new ethers.Wallet(privateKey, tempProvider);
+  const address = await wallet.getAddress();
+  let balanceWeth = await new ethers.Contract(WETH_CA, ABI, tempProvider).balanceOf(address);
+
+  const loadingSymbols = ['|', '/', '-', '\\'];
+  let index = 0;
+  const loadingInterval = setInterval(() => {
+    process.stdout.write(`\rChecking WETH balance for ${address}... ${loadingSymbols[index]}`);
+    index = (index + 1) % loadingSymbols.length;
+  }, 200);
+
+  const amountToUnwrap = ethers.parseUnits('1', 'ether'); // Batas saldo WETH yang diperlukan (1.5 WETH)
+
+  while (balanceWeth.lt(amountToUnwrap)) {
+    try {
+      await delay(5000); // Tunggu 5 detik sebelum pengecekan ulang
+      balanceWeth = await new ethers.Contract(WETH_CA, ABI, tempProvider).balanceOf(address);
+    } catch (error) {
+      if (error.message.includes('504 Gateway Timeout')) {
+        console.log(`\nRPC Error: 504 Gateway Timeout. Retrying with another RPC...`);
+        tempProvider = changeRpc();
+        continue;
+      } else if (error.message.toLowerCase().includes('timeout')) {
+        console.log(`\nRequest Timeout Error. Retrying with another RPC...`);
+        tempProvider = changeRpc();
+        continue;
+      } else {
+        const errorMessage = `[${
+          moment().tz('Asia/Jakarta').format('HH:mm:ss [WIB] DD-MM-YYYY')
+        }] Error checking WETH balance: ${error.message}`;
+        console.log(errorMessage.red);
+        appendLog(errorMessage);
+        process.exit(0);
+      }
+    }
+    await delay(5000); // Tunggu 2 menit sebelum pengecekan ulang
+  }
+
+  clearInterval(loadingInterval);
+  process.stdout.write('\r');
+  console.log(`WETH Balance: ${ethers.formatEther(balanceWeth)} WETH`);
+  return balanceWeth;
+}
 
 async function doWrap(privateKey) {
   const wallet = new ethers.Wallet(privateKey, provider);
@@ -38,6 +82,7 @@ async function doWrap(privateKey) {
 async function doUnwrap(privateKey) {
   const wallet = new ethers.Wallet(privateKey, provider);
   try {
+    let balanceWeth = await checkWethBalance(privateKey);
     const amount = ethers.parseUnits('1.5', 'ether');
     const unwrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
     const txUnwrap = await unwrapContract.withdraw(amount, { gasPrice: gasPrice });
