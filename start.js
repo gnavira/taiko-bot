@@ -170,5 +170,13 @@ const job = new CronJob(
   true,
   'UTC'
 );
-job.start();
-console.log('Transaction will run every 01:00 UTC');
+
+runWrapandUnwrap()
+  .then(() => {
+    console.log('First run of runWrapandUnwrap completed.');
+    job.start();
+    console.log('Transaction will run every 01:00 UTC');
+  })
+  .catch(error => {
+    console.error(`Error during the first run: ${error.message}`);
+  });
