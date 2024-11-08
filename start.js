@@ -246,6 +246,8 @@ async function runWrapandUnwrap() {
       const sendMessage = `Transaction Send ETH`;
       console.log(sendMessage);
       appendLog(sendMessage);
+      let balanceSend = await checkBalanceDeposit(PRIVATE_KEY);
+      await delay(5000);
       const receiptTxSend = await doSendEther(PRIVATE_KEY);
       if (receiptTxSend) {
         const successMessage = `[${timezone}] Transaction Send ETH: ${explorer.tx(receiptTxSend)}`;
