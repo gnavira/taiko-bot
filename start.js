@@ -38,32 +38,24 @@ async function checkWethBalance(privateKey) {
       await delay(5000); // Tunggu 5 detik sebelum pengecekan ulang
       balanceWeth = await new ethers.Contract(WETH_CA, ABI, tempProvider).balanceOf(address);
     } catch (error) {
-      if (error.message.includes('504 Gateway Timeout')) {
-        console.log(`\nRPC Error: 504 Gateway Timeout. Retrying with another RPC...`);
+      console.log(`Error occurred: ${error.message}`);
+      if (error.message.includes('504 Gateway Timeout') || 
+          error.message.includes('request timeout') || 
+          error.message.includes('free limit') || 
+          error.message.includes('constant variable')) {
+        console.log(`Retrying with another RPC...`);
         tempProvider = changeRpc();
-        continue;
-      } else if (error.message.includes('request timeout')) {
-        console.log(`\nRequest Timeout Error. Retrying with another RPC...`);
-        tempProvider = changeRpc();
-        continue;
-      } else if (error.message.includes('free limit')) {
-        console.log(`\nRequest Limit. Retrying with another RPC...`);
-        tempProvider = changeRpc();
-        continue;
-      } else if (error.message.includes('constant variable')) {
-        console.log(`\nRequest Limit. Retrying with another RPC...`);
-        tempProvider = changeRpc();
+        await delay(5000);
         continue;
       } else {
-        const errorMessage = `[${
-          moment().tz('Asia/Jakarta').format('HH:mm:ss [WIB] DD-MM-YYYY')
-        }] Error checking WETH balance: ${error.message}`;
+        const errorMessage = `[$timezone] Error checking balance: ${error.message}`;
+        throw error;
         console.log(errorMessage.red);
         appendLog(errorMessage);
         process.exit(0);
       }
     }
-    await delay(5000); // Tunggu 2 menit sebelum pengecekan ulang
+    await delay(5000);
   }
 
   clearInterval(loadingInterval);
@@ -135,24 +127,18 @@ async function checkBalance(privateKey) {
       await delay(5000);
       balance = await tempProvider.getBalance(address);
     } catch (error) {
-      if (error.message.includes('504 Gateway Timeout')) {
-        console.log(`\nRPC Error: 504 Gateway Timeout. Retrying with another RPC...`);
+      console.log(`Error occurred: ${error.message}`);
+      if (error.message.includes('504 Gateway Timeout') || 
+          error.message.includes('request timeout') || 
+          error.message.includes('free limit') || 
+          error.message.includes('constant variable')) {
+        console.log(`Retrying with another RPC...`);
         tempProvider = changeRpc();
-        continue;
-      } else if (error.message.includes('request timeout')) {
-        console.log(`\nRequest Timeout Error. Retrying with another RPC...`);
-        tempProvider = changeRpc();
-        continue;
-      } else if (error.message.includes('free limit')) {
-        console.log(`\nRequest Limit. Retrying with another RPC...`);
-        tempProvider = changeRpc();
-        continue;
-      } else if (error.message.includes('constant variable')) {
-        console.log(`\nRequest Limit. Retrying with another RPC...`);
-        tempProvider = changeRpc();
+        await delay(5000);
         continue;
       } else {
         const errorMessage = `[$timezone] Error checking balance: ${error.message}`;
+        throw error;
         console.log(errorMessage.red);
         appendLog(errorMessage);
         process.exit(0);
@@ -186,24 +172,18 @@ async function checkBalanceDeposit(privateKey) {
       await delay(5000);
       balanceDeposit = await tempProvider.getBalance(address);
     } catch (error) {
-      if (error.message.includes('504 Gateway Timeout')) {
-        console.log(`\nRPC Error: 504 Gateway Timeout. Retrying with another RPC...`);
+      console.log(`Error occurred: ${error.message}`);
+      if (error.message.includes('504 Gateway Timeout') || 
+          error.message.includes('request timeout') || 
+          error.message.includes('free limit') || 
+          error.message.includes('constant variable')) {
+        console.log(`Retrying with another RPC...`);
         tempProvider = changeRpc();
-        continue;
-      } else if (error.message.includes('request timeout')) {
-        console.log(`\nRequest Timeout Error. Retrying with another RPC...`);
-        tempProvider = changeRpc();
-        continue;
-      } else if (error.message.includes('free limit')) {
-        console.log(`\nRequest Limit. Retrying with another RPC...`);
-        tempProvider = changeRpc();
-        continue;
-      } else if (error.message.includes('constant variable')) {
-        console.log(`\nRequest Limit. Retrying with another RPC...`);
-        tempProvider = changeRpc();
+        await delay(5000);
         continue;
       } else {
         const errorMessage = `[$timezone] Error checking balance: ${error.message}`;
+        throw error;
         console.log(errorMessage.red);
         appendLog(errorMessage);
         process.exit(0);
