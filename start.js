@@ -41,6 +41,7 @@ async function checkWethBalance(privateKey) {
       console.log(`Error occurred: ${error.message}`);
       if (error.message.includes('504 Gateway Timeout') || 
           error.message.includes('request timeout') || 
+          error.message.includes('failed to detect network') || 
           error.message.includes('free limit') || 
           error.message.includes('constant variable')) {
         console.log(`Retrying with another RPC...`);
@@ -130,6 +131,7 @@ async function checkBalance(privateKey) {
       console.log(`Error occurred: ${error.message}`);
       if (error.message.includes('504 Gateway Timeout') || 
           error.message.includes('request timeout') || 
+          error.message.includes('failed to detect network') || 
           error.message.includes('free limit') || 
           error.message.includes('constant variable')) {
         console.log(`Retrying with another RPC...`);
@@ -175,6 +177,7 @@ async function checkBalanceDeposit(privateKey) {
       console.log(`Error occurred: ${error.message}`);
       if (error.message.includes('504 Gateway Timeout') || 
           error.message.includes('request timeout') || 
+          error.message.includes('failed to detect network') || 
           error.message.includes('free limit') || 
           error.message.includes('constant variable')) {
         console.log(`Retrying with another RPC...`);
