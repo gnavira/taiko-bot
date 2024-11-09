@@ -302,6 +302,7 @@ async function runWrapandUnwrap() {
         console.log(`Retrying with another RPC...`);
         tempProvider = changeRpc();
       console.log(errorMessage.red);
+      console.log(error);
       appendLog(errorMessage);
       await delay(5000);
       console.log('');
