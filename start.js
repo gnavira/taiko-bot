@@ -41,6 +41,7 @@ async function checkWethBalance(privateKey) {
       console.log(`Error occurred: ${error.message}`);
       if (error.message.includes('504 Gateway Timeout') || 
           error.message.includes('request timeout') || 
+          error.message.includes('Internal Server Error') || 
           error.message.includes('failed to detect network') || 
           error.message.includes('free limit') || 
           error.message.includes('constant variable')) {
@@ -67,50 +68,97 @@ async function checkWethBalance(privateKey) {
 
 async function doWrap(privateKey) {
   const wallet = new ethers.Wallet(privateKey, provider);
-  try {
-    const amount = ethers.parseUnits('1.5', 'ether');
-    const wrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
-    const txWrap = await wrapContract.deposit({ value: amount, gasPrice: gasPrice });
-    const receipt = await txWrap.wait(2);
-    return receipt.hash;
-  } catch (error) {
-    const errorMessage = `[$timezone] Error executing transaction: ${error.message}`;
-    console.log(errorMessage.red);
-    appendLog(errorMessage);
-  }
-}
+  const amount = ethers.parseUnits('1.5', 'ether');
+  const maxRetries = 3; // Maximum number of retries
+  let attempt = 0;
 
+  while (attempt < maxRetries) {
+    try {
+      const wrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
+      const txWrap = await wrapContract.deposit({ value: amount, gasPrice: gasPrice });
+      const receipt = await txWrap.wait(2);
+      return receipt.hash; // Return the transaction hash on success
+    } catch (error) {
+      attempt++;
+      const errorMessage = `[$timezone] Error executing Wrap transaction (Attempt ${attempt}/${maxRetries}): ${error.message}`;
+      console.log(errorMessage.red);
+      appendLog(errorMessage);
+
+      // Check for insufficient funds or missing revert data
+      if (attempt < maxRetries && (error.message.includes('insufficient funds') || 
+          error.message.includes('missing revert data'))) {
+        console.log(`Retrying transaction after delay...`);
+        await delay(10000); // Wait for 5 seconds before retrying
+      } else {
+        throw error; // Re-throw the error for other issues or if max retries reached
+      }
+    }
+  }
+
+  throw new Error(`Exceeded maximum retries for Wrap transaction.`); // Throw an error if all retries failed
+}
 async function doUnwrap(privateKey) {
   const wallet = new ethers.Wallet(privateKey, provider);
-  try {
-    const amount = ethers.parseUnits('1.5', 'ether');
-    const unwrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
-    const txUnwrap = await unwrapContract.withdraw(amount, { gasPrice: gasPrice });
-    const receipt = await txUnwrap.wait(2);
-    return receipt.hash;
-  } catch (error) {
-    const errorMessage = `[$timezone] Error executing transaction: ${error.message}`;
-    console.log(errorMessage.red);
-    appendLog(errorMessage);
+  const amount = ethers.parseUnits('1.5', 'ether');
+  const maxRetries = 3; // Maximum number of retries
+  let attempt = 0;
+
+  while (attempt < maxRetries) {
+    try {
+      const unwrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
+      const txUnwrap = await unwrapContract.withdraw(amount, { gasPrice: gasPrice });
+      const receipt = await txUnwrap.wait(2);
+      return receipt.hash; // Return the transaction hash on success
+    } catch (error) {
+      attempt++;
+      const errorMessage = `[$timezone] Error executing Unwrap transaction (Attempt ${attempt}/${maxRetries}): ${error.message}`;
+      console.log(errorMessage.red);
+      appendLog(errorMessage);
+
+      // Check for insufficient funds or missing revert data
+      if (attempt < maxRetries && (error.message.includes('insufficient funds') || 
+          error.message.includes('missing revert data'))) {
+        console.log(`Retrying transaction after delay...`);
+        await delay(10000);
+      } else {
+        throw error;
+      }
+    }
   }
+
+  throw new Error(`Exceeded maximum retries for Unwrap transaction.`);
 }
 
 async function doSendEther(privateKey) {
   const wallet = new ethers.Wallet(privateKey, provider);
-  try {
-    const recipients = recipientsaddress;
-    const values = recipients.map(() => ethers.parseUnits('1.5', 'ether'));
-    const sendContract = new ethers.Contract(SEND_CA, SEND_ABI, wallet);
-    const txSendContract = await sendContract.multicall(recipients, values, { value: ethers.parseUnits('1.5', 'ether'), gasPrice: gasPrice });
-    const receipt = await txSendContract.wait(2);
-    return receipt.hash;
-  } catch (error) {
-    const errorMessage = `[$timezone] Error executing Send ETH transaction: ${error.message}`;
-    console.log(errorMessage.red);
-    appendLog(errorMessage);
-  }
-}
+  const recipients = recipientsaddress;
+  const values = recipients.map(() => ethers.parseUnits('1.5', 'ether'));
+  const sendContract = new ethers.Contract(SEND_CA, SEND_ABI, wallet);
+  const maxRetries = 3; // Maximum number of retries
+  let attempt = 0;
 
+  while (attempt < maxRetries) {
+    try {
+      const txSendContract = await sendContract.multicall(recipients, values, { value: ethers.parseUnits('1.5', 'ether'), gasPrice: gasPrice });
+      const receipt = await txSendContract.wait(2);
+      return receipt.hash; // Return the transaction hash on success
+    } catch (error) {
+      attempt++;
+      const errorMessage = `[$timezone] Error executing Send ETH transaction (Attempt ${attempt}/${maxRetries}): ${error.message}`;
+      console.log(errorMessage.red);
+      appendLog(errorMessage);
+      if (attempt < maxRetries && (error.message.includes('insufficient funds') || 
+          error.message.includes('missing revert data'))) {
+        console.log(`Retrying transaction after delay...`);
+        await delay(5000); // Wait for 5 seconds before retrying
+      } else {
+        throw error; // Re-throw the error for other issues or if max retries reached
+      }
+    }
+  }
+
+  throw new Error(`Exceeded maximum retries for Send ETH transaction.`); // Throw an error if all retries failed
+}
 async function checkBalance(privateKey) {
   const wallet = new ethers.Wallet(privateKey, tempProvider);
   const address = await wallet.getAddress();
@@ -131,6 +179,7 @@ async function checkBalance(privateKey) {
       console.log(`Error occurred: ${error.message}`);
       if (error.message.includes('504 Gateway Timeout') || 
           error.message.includes('request timeout') || 
+          error.message.includes('Internal Server Error') || 
           error.message.includes('failed to detect network') || 
           error.message.includes('free limit') || 
           error.message.includes('constant variable')) {
@@ -177,6 +226,7 @@ async function checkBalanceDeposit(privateKey) {
       console.log(`Error occurred: ${error.message}`);
       if (error.message.includes('504 Gateway Timeout') || 
           error.message.includes('request timeout') || 
+          error.message.includes('Internal Server Error') || 
           error.message.includes('failed to detect network') || 
           error.message.includes('free limit') || 
           error.message.includes('constant variable')) {
@@ -266,12 +316,5 @@ const job = new CronJob(
   true,
   'UTC'
 );
-runWrapandUnwrap()
-  .then(() => {
-    console.log('First run of runWrapandUnwrap completed.');
-    job.start();
-    console.log('Transaction will run every 01:00 UTC');
-  })
-  .catch(error => {
-    console.error(`Error during the first run: ${error.message}`);
-  });
+job.start();
+console.log('Transaction will run every 01:00 UTC');
