@@ -257,6 +257,7 @@ async function runWrapandUnwrap() {
       console.log('');
     }
   }
+ }
 }
 const job = new CronJob(
   '0 1 * * *',
