@@ -25,6 +25,11 @@ async function switchProvider() {
   tempProvider = changeRpc(); // Memperbarui penyedia
   await delay(5000); // Beri sedikit waktu untuk stabil
 }
+async function switchRpc() {
+  console.log(`Beralih ke penyedia RPC baru...`);
+  provider = changeProvider(); // Memperbarui penyedia
+  await delay(5000); // Beri sedikit waktu untuk stabil
+}
 
 function isTimeoutError(error) {
   return error.message.includes('504 Gateway Timeout') || 
