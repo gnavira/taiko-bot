@@ -15,7 +15,8 @@ const SEND_CA = '0x2A5b0a407828b6Ca2E87e2e568CD8413fd5c24A1';
 const recipientsaddress = JSON.parse(fs.readFileSync('recipients.json', 'utf8'));
 const { CronJob } = require('cron');
 const amountCheck = ethers.parseEther('1', 'ether');
-const gasPrice = ethers.parseUnits('0.2', 'gwei');
+const gasPrice = ethers.parseUnits('0.19', 'gwei');
+const readline = require('readline');
 
 function appendLog(message) {
   fs.appendFileSync('log.txt', message + '\n');
