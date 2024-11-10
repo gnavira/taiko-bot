@@ -299,7 +299,7 @@ async function runWrapandUnwrap() {
           error.message.includes('failed to detect network') || 
           error.message.includes('free limit') || 
           error.message.includes('constant variable')) {
-        console.log(`Retrying with another RPC ${temProvider.connection.url}`);
+        console.log(`Retrying with another RPC ${tempProvider.connection.url}`);
         tempProvider = changeRpc();
       console.log(errorMessage.red);
       console.log(error);
