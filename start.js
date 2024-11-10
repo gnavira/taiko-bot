@@ -283,13 +283,6 @@ async function runWrapandUnwrap() {
       console.log('');
     } catch (error) {
       const errorMessage = `[${timezone}] Error processing transaction. Details: ${error.message}`;
-      if (error.message.includes('504 Gateway Timeout') || 
-          error.message.includes('request timeout') || 
-          error.message.includes('failed to detect network') || 
-          error.message.includes('free limit') || 
-          error.message.includes('constant variable')) {
-        console.log(`Retrying with another RPC ${tempProvider.connection.url}`);
-        await switchProvider();
       console.log(errorMessage.red);
       console.log(error);
       appendLog(errorMessage);
