@@ -1,9 +1,9 @@
 const { ethers } = require('ethers');
 const chains = require('./chains');
 let provider = chains.mainnet.taiko.provider();
-const changeProvider = chains.mainnet.taiko.changeRpcProvider;
+const changeProvider = chains.mainnet.taiko.changeRpcProvider();
 const explorer = chains.mainnet.taiko.explorer;
-const changeRpc = chains.mainnet.tempTaiko.changeRpcProvider;
+const changeRpc = chains.mainnet.tempTaiko.changeRpcProvider();
 let tempProvider = chains.mainnet.tempTaiko.provider();
 const fs = require('fs');
 const moment = require('moment-timezone');
@@ -22,12 +22,26 @@ function appendLog(message) {
 }
 async function switchProvider() {
   console.log(`Beralih ke penyedia RPC baru...`);
-  tempProvider = changeRpc(); // Memperbarui penyedia
+  tempProvider = changeRpc; // Memperbarui penyedia
+
+  // Tambahkan log untuk memeriksa apakah penyedia baru valid
+  if (tempProvider && tempProvider.connection && tempProvider.connection.url) {
+    console.log(`Menggunakan RPC: ${tempProvider.connection.url}`);
+  } else {
+    console.error(`Error: Penyedia RPC baru tidak valid.`);
+  }
+
   await delay(5000); // Beri sedikit waktu untuk stabil
 }
 async function switchRpc() {
   console.log(`Beralih ke penyedia RPC baru...`);
-  provider = changeProvider(); // Memperbarui penyedia
+  provider = changeProvider; // Memperbarui penyedia
+  if (provider && provider.connection && provider.connection.url) {
+    console.log(`Menggunakan RPC: ${provider.connection.url}`);
+  } else {
+    console.error(`Error: Penyedia RPC baru tidak valid.`);
+  }
+
   await delay(5000); // Beri sedikit waktu untuk stabil
 }
 
