@@ -188,7 +188,7 @@ async function checkBalance(privateKey) {
           error.message.includes('failed to detect network') || 
           error.message.includes('free limit') || 
           error.message.includes('constant variable')) {
-        console.log(`Retrying with another RPC ${tempProvider.connection.url}`);
+        console.log(`Retrying with another RPC ${tempProvider().connection.url}`);
         tempProvider = changeRpc();
         await delay(5000);
       } else {
