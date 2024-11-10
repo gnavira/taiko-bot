@@ -1,6 +1,7 @@
 const { ethers } = require('ethers');
 const chains = require('./chains');
-const provider = chains.mainnet.taiko.provider();
+let provider = chains.mainnet.taiko.provider();
+const changeProvider = chains.mainnet.taiko.changeRpcProvider;
 const explorer = chains.mainnet.taiko.explorer;
 const changeRpc = chains.mainnet.tempTaiko.changeRpcProvider;
 let tempProvider = chains.mainnet.tempTaiko.provider();
@@ -83,10 +84,12 @@ async function doWrap(privateKey) {
       console.log(errorMessage.red);
       appendLog(errorMessage);
       if (attempt < maxRetries && (error.message.includes('insufficient funds') || 
-          error.message.includes('nonce has already') || 
+          error.message.includes('nonce has already') ||
+          error.message.includes('Gateway Timeout') ||
           error.message.includes('missing revert data'))) {
         console.log(`Retrying transaction after delay...`);
-        await delay(15000);
+        await delay(20000);
+        provider = changeProviders();
       } else {
         throw error; // Re-throw the error for other issues or if max retries reached
       }
@@ -113,10 +116,12 @@ async function doUnwrap(privateKey) {
       console.log(errorMessage.red);
       appendLog(errorMessage);
       if (attempt < maxRetries && (error.message.includes('insufficient funds') || 
-          error.message.includes('nonce has already') || 
+          error.message.includes('nonce has already') ||
+          error.message.includes('Gateway Timeout') ||
           error.message.includes('missing revert data'))) {
         console.log(`Retrying transaction after delay...`);
-        await delay(15000);
+        await delay(20000);
+        provider = changeProviders();
       } else {
         throw error;
       }
@@ -145,10 +150,12 @@ async function doSendEther(privateKey) {
       console.log(errorMessage.red);
       appendLog(errorMessage);
       if (attempt < maxRetries && (error.message.includes('insufficient funds') || 
-          error.message.includes('nonce has already') || 
+          error.message.includes('nonce has already') ||
+          error.message.includes('Gateway Timeout') ||
           error.message.includes('missing revert data'))) {
         console.log(`Retrying transaction after delay...`);
-        await delay(15000);
+        await delay(20000);
+        provider = changeProviders();
       } else {
         throw error; // Re-throw the error for other issues or if max retries reached
       }
