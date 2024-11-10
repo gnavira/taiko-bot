@@ -325,6 +325,7 @@ function askCronSchedule() {
 
 async function main() {
   const cronSchedule = await askCronSchedule();
+  console.log(`Transaksi akan dijalan kan pada: ${cronSchedule}`);
 
   const job = new CronJob(
     cronSchedule,
@@ -336,4 +337,4 @@ async function main() {
 
   job.start();
 }
-main()
+main();
