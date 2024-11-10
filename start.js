@@ -82,12 +82,11 @@ async function doWrap(privateKey) {
       const errorMessage = `[$timezone] Error executing Wrap transaction (Attempt ${attempt}/${maxRetries}): ${error.message}`;
       console.log(errorMessage.red);
       appendLog(errorMessage);
-
-      // Check for insufficient funds or missing revert data
       if (attempt < maxRetries && (error.message.includes('insufficient funds') || 
+          error.message.includes('nonce has already') || 
           error.message.includes('missing revert data'))) {
         console.log(`Retrying transaction after delay...`);
-        await delay(10000); // Wait for 5 seconds before retrying
+        await delay(15000);
       } else {
         throw error; // Re-throw the error for other issues or if max retries reached
       }
@@ -113,12 +112,11 @@ async function doUnwrap(privateKey) {
       const errorMessage = `[$timezone] Error executing Unwrap transaction (Attempt ${attempt}/${maxRetries}): ${error.message}`;
       console.log(errorMessage.red);
       appendLog(errorMessage);
-
-      // Check for insufficient funds or missing revert data
       if (attempt < maxRetries && (error.message.includes('insufficient funds') || 
+          error.message.includes('nonce has already') || 
           error.message.includes('missing revert data'))) {
         console.log(`Retrying transaction after delay...`);
-        await delay(10000);
+        await delay(15000);
       } else {
         throw error;
       }
@@ -147,9 +145,10 @@ async function doSendEther(privateKey) {
       console.log(errorMessage.red);
       appendLog(errorMessage);
       if (attempt < maxRetries && (error.message.includes('insufficient funds') || 
+          error.message.includes('nonce has already') || 
           error.message.includes('missing revert data'))) {
         console.log(`Retrying transaction after delay...`);
-        await delay(5000); // Wait for 5 seconds before retrying
+        await delay(15000);
       } else {
         throw error; // Re-throw the error for other issues or if max retries reached
       }
