@@ -31,7 +31,7 @@ async function checkWethBalance(privateKey) {
     index = (index + 1) % loadingSymbols.length;
   }, 200);
 
-  const amountToUnwrap = ethers.parseUnits('1', 'ether'); // Batas saldo WETH yang diperlukan (1.5 WETH)
+  const amountToUnwrap = ethers.parseUnits('1', 'ether')
 
   while (balanceWeth <= amountToUnwrap) {
     try {
@@ -45,7 +45,7 @@ async function checkWethBalance(privateKey) {
           error.message.includes('failed to detect network') || 
           error.message.includes('free limit') || 
           error.message.includes('constant variable')) {
-        console.log(`Retrying with another RPC...`);
+        console.log(`Retrying with another RPC ${tempProvider.connection.url}`);
         tempProvider = changeRpc();
         await delay(5000);
         continue;
@@ -183,7 +183,7 @@ async function checkBalance(privateKey) {
           error.message.includes('failed to detect network') || 
           error.message.includes('free limit') || 
           error.message.includes('constant variable')) {
-        console.log(`Retrying with another RPC...`);
+        console.log(`Retrying with another RPC ${tempProvider.connection.url}`);
         tempProvider = changeRpc();
         await delay(5000);
         continue;
@@ -230,7 +230,7 @@ async function checkBalanceDeposit(privateKey) {
           error.message.includes('failed to detect network') || 
           error.message.includes('free limit') || 
           error.message.includes('constant variable')) {
-        console.log(`Retrying with another RPC...`);
+        console.log(`Retrying with another RPC ${tempProvider.connection.url}`);
         tempProvider = changeRpc();
         await delay(5000);
         continue;
@@ -299,7 +299,7 @@ async function runWrapandUnwrap() {
           error.message.includes('failed to detect network') || 
           error.message.includes('free limit') || 
           error.message.includes('constant variable')) {
-        console.log(`Retrying with another RPC...`);
+        console.log(`Retrying with another RPC ${temProvider.connection.url}`);
         tempProvider = changeRpc();
       console.log(errorMessage.red);
       console.log(error);
