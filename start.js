@@ -305,11 +305,34 @@ async function runWrapandUnwrap() {
     }
   }
  }
-const job = new CronJob(
-  '0 1 * * *',
-  runWrapandUnwrap,
-  null,
-  true,
-  'UTC'
-);
+function askCronSchedule() {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
 
+  return new Promise((resolve) => {
+    rl.question('Masukkan menit dan jam (misal: "0 1"): ', (input) => {
+      rl.close();
+      const [minutes, hours] = input.split(' ');
+      // Buat ekspresi cron lengkap
+      const cronSchedule = `${minutes} ${hours} * * *`;
+      resolve(cronSchedule);
+    });
+  });
+}
+
+async function main() {
+  const cronSchedule = await askCronSchedule();
+
+  const job = new CronJob(
+    cronSchedule,
+    runWrapandUnwrap,
+    null,
+    true,
+    'UTC'
+  );
+
+  job.start();
+}
+main()
