@@ -53,6 +53,7 @@ async function checkWethBalance(privateKey) {
         throw error;
         console.log(errorMessage.red);
         appendLog(errorMessage);
+        throw error;
         process.exit(0);
       }
     }
@@ -190,6 +191,7 @@ async function checkBalance(privateKey) {
         throw error;
         console.log(errorMessage.red);
         appendLog(errorMessage);
+        throw error;
         process.exit(0);
       }
     }
@@ -236,6 +238,7 @@ async function checkBalanceDeposit(privateKey) {
         throw error;
         console.log(errorMessage.red);
         appendLog(errorMessage);
+        throw error;
         process.exit(0);
       }
     }
