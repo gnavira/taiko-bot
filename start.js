@@ -201,15 +201,6 @@ async function checkBalance(privateKey) {
   console.log(`Pemeriksaan saldo selesai. Saldo: ${ethers.formatEther(balance)} ETH`);
   return balance;
 }
-
-  clearInterval(loadingInterval);
-  process.stdout.write('\r');
-  console.log(`Balance check completed`);
-  console.log(`Wallet address: ${address}`);
-  console.log(`Balance: ${ethers.formatEther(balance)} ETH`);
-  console.log('');
-  return balance;
-}
 async function checkBalanceDeposit(privateKey) {
   const wallet = new ethers.Wallet(privateKey, tempProvider);
   const address = await wallet.getAddress();
