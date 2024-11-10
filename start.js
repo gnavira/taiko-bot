@@ -76,7 +76,7 @@ async function doWrap(privateKey) {
     try {
       const wrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
       const txWrap = await wrapContract.deposit({ value: amount, gasPrice: gasPrice });
-      const receipt = await txWrap.wait(2);
+      const receipt = await txWrap.wait(1);
       return receipt.hash; // Return the transaction hash on success
     } catch (error) {
       attempt++;
@@ -108,7 +108,7 @@ async function doUnwrap(privateKey) {
     try {
       const unwrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
       const txUnwrap = await unwrapContract.withdraw(amount, { gasPrice: gasPrice });
-      const receipt = await txUnwrap.wait(2);
+      const receipt = await txUnwrap.wait(1);
       return receipt.hash; // Return the transaction hash on success
     } catch (error) {
       attempt++;
@@ -142,7 +142,7 @@ async function doSendEther(privateKey) {
   while (attempt < maxRetries) {
     try {
       const txSendContract = await sendContract.multicall(recipients, values, { value: ethers.parseUnits('1.5', 'ether'), gasPrice: gasPrice });
-      const receipt = await txSendContract.wait(2);
+      const receipt = await txSendContract.wait(1);
       return receipt.hash; // Return the transaction hash on success
     } catch (error) {
       attempt++;
