@@ -2,9 +2,10 @@ require('dotenv').config();
 const { JsonRpcProvider } = require('ethers');
 
 const rpcProviders = [
-  new JsonRpcProvider('https://rpc.ankr.com/taiko/798addad26f4f67fb07c1bbf9022a36e136dc000acf909b85feb16e3fff6791a'),
   new JsonRpcProvider('https://rpc.taiko.xyz'),
   new JsonRpcProvider('https://rpc.ankr.com/taiko'),
+  new JsonRpcProvider('https://taiko.drpc.org'),
+  new JsonRpcProvider('https://taiko-mainnet.rpc.porters.xyz/taiko-public'),
   new JsonRpcProvider('https://167000.rpc.thirdweb.com'),
   new JsonRpcProvider('https://taiko-rpc.publicnode.com'),
 ];
