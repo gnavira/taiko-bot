@@ -50,7 +50,6 @@ async function checkWethBalance(privateKey) {
         await delay(5000);
       } else {
         const errorMessage = `[$timezone] Error checking balance: ${error.message}`;
-        throw error;
         console.log(errorMessage.red);
         appendLog(errorMessage);
         throw error;
@@ -188,7 +187,6 @@ async function checkBalance(privateKey) {
         await delay(5000);
       } else {
         const errorMessage = `[$timezone] Error checking balance: ${error.message}`;
-        throw error;
         console.log(errorMessage.red);
         appendLog(errorMessage);
         throw error;
@@ -235,7 +233,6 @@ async function checkBalanceDeposit(privateKey) {
         await delay(5000);
       } else {
         const errorMessage = `[$timezone] Error checking balance: ${error.message}`;
-        throw error;
         console.log(errorMessage.red);
         appendLog(errorMessage);
         throw error;
