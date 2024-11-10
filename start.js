@@ -20,6 +20,19 @@ const gasPrice = ethers.parseUnits('0.2', 'gwei');
 function appendLog(message) {
   fs.appendFileSync('log.txt', message + '\n');
 }
+async function switchProvider() {
+  console.log(`Beralih ke penyedia RPC baru...`);
+  tempProvider = changeRpc(); // Memperbarui penyedia
+  await delay(5000); // Beri sedikit waktu untuk stabil
+}
+
+function isTimeoutError(error) {
+  return error.message.includes('504 Gateway Timeout') || 
+         error.message.includes('request timeout') || 
+         error.message.includes('failed to detect network') || 
+         error.message.includes('free limit') || 
+         error.message.includes('constant variable');
+}
 async function checkWethBalance(privateKey) {
   const wallet = new ethers.Wallet(privateKey, tempProvider);
   const address = await wallet.getAddress();
@@ -36,30 +49,20 @@ async function checkWethBalance(privateKey) {
 
   while (balanceWeth <= amountToUnwrap) {
     try {
-      await delay(5000); // Tunggu 5 detik sebelum pengecekan ulang
+      await delay(5000);
       balanceWeth = await new ethers.Contract(WETH_CA, ABI, tempProvider).balanceOf(address);
     } catch (error) {
-      console.log(`Error occurred: ${error.message}`);
-      if (error.message.includes('504 Gateway Timeout') || 
-          error.message.includes('request timeout') || 
-          error.message.includes('Internal Server Error') || 
-          error.message.includes('failed to detect network') || 
-          error.message.includes('free limit') || 
-          error.message.includes('constant variable')) {
-        console.log(`Retrying with another RPC ${tempProvider.connection.url}`);
-        tempProvider = changeRpc();
-        await delay(5000);
-      } else {
-        const errorMessage = `[$timezone] Error checking balance: ${error.message}`;
-        console.log(errorMessage.red);
-        appendLog(errorMessage);
-        throw error;
-        process.exit(0);
+      if (isTimeoutError(error)) {
+        console.log(`Kesalahan timeout terjadi: ${error.message}`);
+        await switchProvider();
+        continue;
       }
+      const errorMessage = `Kesalahan memeriksa saldo: ${error.message}`;
+      console.log(errorMessage.red);
+      appendLog(errorMessage);
+      throw error;
     }
-    await delay(5000);
   }
-
   clearInterval(loadingInterval);
   process.stdout.write('\r');
   console.log(`${ethers.formatEther(balanceWeth)} WETH`.blue);
@@ -172,35 +175,32 @@ async function checkBalance(privateKey) {
   const loadingSymbols = ['|', '/', '-', '\\'];
   let index = 0;
   const loadingInterval = setInterval(() => {
-    process.stdout.write(`\rChecking balance for ${address}... ${loadingSymbols[index]}`);
+    process.stdout.write(`\rMemeriksa saldo untuk ${address}... ${loadingSymbols[index]}`);
     index = (index + 1) % loadingSymbols.length;
   }, 200);
 
   while (balance <= amountCheck) {
     try {
-      await delay(5000);
+      await delay(120000);
       balance = await tempProvider.getBalance(address);
     } catch (error) {
-      console.log(`Error occurred: ${error.message}`);
-      if (error.message.includes('504 Gateway Timeout') || 
-          error.message.includes('request timeout') || 
-          error.message.includes('Internal Server Error') || 
-          error.message.includes('failed to detect network') || 
-          error.message.includes('free limit') || 
-          error.message.includes('constant variable')) {
-        console.log(`Retrying with another RPC ${tempProvider().connection.url}`);
-        tempProvider = changeRpc();
-        await delay(5000);
-      } else {
-        const errorMessage = `[$timezone] Error checking balance: ${error.message}`;
-        console.log(errorMessage.red);
-        appendLog(errorMessage);
-        throw error;
-        process.exit(0);
+      if (isTimeoutError(error)) {
+        console.log(`Kesalahan timeout terjadi: ${error.message}`);
+        await switchProvider();
+        continue;
       }
+      const errorMessage = `Kesalahan memeriksa saldo: ${error.message}`;
+      console.log(errorMessage.red);
+      appendLog(errorMessage);
+      throw error;
     }
-    await delay(120000);
   }
+
+  clearInterval(loadingInterval);
+  process.stdout.write('\r');
+  console.log(`Pemeriksaan saldo selesai. Saldo: ${ethers.formatEther(balance)} ETH`);
+  return balance;
+}
 
   clearInterval(loadingInterval);
   process.stdout.write('\r');
@@ -227,27 +227,17 @@ async function checkBalanceDeposit(privateKey) {
       await delay(5000);
       balanceDeposit = await tempProvider.getBalance(address);
     } catch (error) {
-      console.log(`Error occurred: ${error.message}`);
-      if (error.message.includes('504 Gateway Timeout') || 
-          error.message.includes('request timeout') || 
-          error.message.includes('Internal Server Error') || 
-          error.message.includes('failed to detect network') || 
-          error.message.includes('free limit') || 
-          error.message.includes('constant variable')) {
-        console.log(`Retrying with another RPC ${tempProvider.connection.url}`);
-        tempProvider = changeRpc();
-        await delay(5000);
-      } else {
-        const errorMessage = `[$timezone] Error checking balance: ${error.message}`;
-        console.log(errorMessage.red);
-        appendLog(errorMessage);
-        throw error;
-        process.exit(0);
+      if (isTimeoutError(error)) {
+        console.log(`Kesalahan timeout terjadi: ${error.message}`);
+        await switchProvider();
+        continue;
       }
+      const errorMessage = `Kesalahan memeriksa saldo: ${error.message}`;
+      console.log(errorMessage.red);
+      appendLog(errorMessage);
+      throw error;
     }
-    await delay(5000);
   }
-
   clearInterval(loadingInterval);
   process.stdout.write('\r');
   console.log(`${ethers.formatEther(balanceDeposit)} ETH`.blue);
@@ -303,7 +293,7 @@ async function runWrapandUnwrap() {
           error.message.includes('free limit') || 
           error.message.includes('constant variable')) {
         console.log(`Retrying with another RPC ${tempProvider.connection.url}`);
-        tempProvider = changeRpc();
+        await switchProvider();
       console.log(errorMessage.red);
       console.log(error);
       appendLog(errorMessage);
