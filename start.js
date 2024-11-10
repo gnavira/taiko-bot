@@ -97,7 +97,7 @@ async function doWrap(privateKey) {
           error.message.includes('missing revert data'))) {
         console.log(`Retrying transaction after delay...`);
         await delay(20000);
-        provider = changeProviders();
+        await switchRpc();
       } else {
         throw error; // Re-throw the error for other issues or if max retries reached
       }
@@ -129,7 +129,7 @@ async function doUnwrap(privateKey) {
           error.message.includes('missing revert data'))) {
         console.log(`Retrying transaction after delay...`);
         await delay(20000);
-        provider = changeProviders();
+        await switchRpc();
       } else {
         throw error;
       }
@@ -163,7 +163,7 @@ async function doSendEther(privateKey) {
           error.message.includes('missing revert data'))) {
         console.log(`Retrying transaction after delay...`);
         await delay(20000);
-        provider = changeProviders();
+        await switchRpc();
       } else {
         throw error; // Re-throw the error for other issues or if max retries reached
       }
