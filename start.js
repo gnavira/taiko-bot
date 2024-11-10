@@ -22,7 +22,6 @@ function appendLog(message) {
 async function checkWethBalance(privateKey) {
   const wallet = new ethers.Wallet(privateKey, tempProvider);
   const address = await wallet.getAddress();
-  console.log(`RPC ${tempProvider.connection.url}`)
   let balanceWeth = await new ethers.Contract(WETH_CA, ABI, tempProvider).balanceOf(address);
 
   const loadingSymbols = ['|', '/', '-', '\\'];
@@ -163,7 +162,6 @@ async function doSendEther(privateKey) {
 async function checkBalance(privateKey) {
   const wallet = new ethers.Wallet(privateKey, tempProvider);
   const address = await wallet.getAddress();
-  console.log(`RPC ${tempProvider.connection.url}`)
   let balance = await tempProvider.getBalance(address);
 
   const loadingSymbols = ['|', '/', '-', '\\'];
@@ -211,7 +209,6 @@ async function checkBalance(privateKey) {
 async function checkBalanceDeposit(privateKey) {
   const wallet = new ethers.Wallet(privateKey, tempProvider);
   const address = await wallet.getAddress();
-  console.log(`RPC ${tempProvider.connection.url}`)
   let balanceDeposit = await tempProvider.getBalance(address);
 
   const loadingSymbols = ['|', '/', '-', '\\'];
