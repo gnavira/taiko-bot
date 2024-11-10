@@ -305,7 +305,6 @@ async function runWrapandUnwrap() {
     }
   }
  }
-}
 const job = new CronJob(
   '0 1 * * *',
   runWrapandUnwrap,
