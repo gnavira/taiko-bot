@@ -48,7 +48,6 @@ async function checkWethBalance(privateKey) {
         console.log(`Retrying with another RPC ${tempProvider.connection.url}`);
         tempProvider = changeRpc();
         await delay(5000);
-        continue;
       } else {
         const errorMessage = `[$timezone] Error checking balance: ${error.message}`;
         throw error;
@@ -186,7 +185,6 @@ async function checkBalance(privateKey) {
         console.log(`Retrying with another RPC ${tempProvider.connection.url}`);
         tempProvider = changeRpc();
         await delay(5000);
-        continue;
       } else {
         const errorMessage = `[$timezone] Error checking balance: ${error.message}`;
         throw error;
@@ -233,7 +231,6 @@ async function checkBalanceDeposit(privateKey) {
         console.log(`Retrying with another RPC ${tempProvider.connection.url}`);
         tempProvider = changeRpc();
         await delay(5000);
-        continue;
       } else {
         const errorMessage = `[$timezone] Error checking balance: ${error.message}`;
         throw error;
