@@ -1,8 +1,8 @@
 const { JsonRpcProvider } = require('ethers');
 
 const rpcProviders = [  
-  'https://rpc.mainnet.taiko.xyz'
-  'https://rpc.ankr.com/taiko/798addad26f4f67fb07c1bbf9022a36e136dc000acf909b85feb16e3fff6791a'
+  'https://rpc.mainnet.taiko.xyz',
+  'https://rpc.ankr.com/taiko/798addad26f4f67fb07c1bbf9022a36e136dc000acf909b85feb16e3fff6791a',
 ];
 
 let currentRpcProviderIndex = 0;  
