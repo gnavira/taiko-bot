@@ -6,19 +6,15 @@ const rpcProviders = [
 ];
 
 let currentRpcProviderIndex = 0;  
-  
-function provider() {  
-  return rpcProviders[currentRpcProviderIndex];  
-}  
-  
+let provider = new JsonRpcProvider(rpcProviders[currentRpcProviderIndex]);
 function changeRpcProvider() {  
   currentRpcProviderIndex = (currentRpcProviderIndex + 1) % rpcProviders.length;
-	provider = new JsonRpcProvider(rpcProviders[currentRpcProviderIndex])
-	console.log("Switch to RPC:", currentRpc());
-    return provider;
+  provider = new JsonRpcProvider(rpcProviders[currentRpcProviderIndex])
+  console.log("Switch to RPC:", currentRpc());
+  return provider;
 }
 function currentRpc() {
-	return rpcProviders[currentRpcProviderIndex];
+  return rpcProviders[currentRpcProviderIndex];
 }
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
