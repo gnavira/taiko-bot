@@ -1,6 +1,4 @@
-require('dotenv').config();
 const { JsonRpcProvider } = require('ethers');
-
 const rpcProviders = [
   new JsonRpcProvider('https://rpc.taiko.xyz'),
   new JsonRpcProvider('https://rpc.ankr.com/taiko'),
@@ -9,9 +7,9 @@ const rpcProviders = [
   new JsonRpcProvider('https://167000.rpc.thirdweb.com'),
   new JsonRpcProvider('https://taiko-rpc.publicnode.com'),
 ];
-
 let currentRpcProviderIndex = 0;  
 let provider = new JsonRpcProvider(rpcProviders[currentRpcProviderIndex]);
+
 function changeRpcProvider() {  
   currentRpcProviderIndex = (currentRpcProviderIndex + 1) % rpcProviders.length;
   provider = new JsonRpcProvider(rpcProviders[currentRpcProviderIndex])
