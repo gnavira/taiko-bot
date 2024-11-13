@@ -11,16 +11,16 @@ const rpcProviders = [
 ];
 
 let currentRpcProviderIndex = 0;  
-  
-function provider() {  
-  return rpcProviders[currentRpcProviderIndex];  
-}  
-  
+let provider = new JsonRpcProvider(rpcProviders[currentRpcProviderIndex]);
 function changeRpcProvider() {  
-  currentRpcProviderIndex = (currentRpcProviderIndex + 1) % rpcProviders.length;  
-  return provider();  
+  currentRpcProviderIndex = (currentRpcProviderIndex + 1) % rpcProviders.length;
+  provider = new JsonRpcProvider(rpcProviders[currentRpcProviderIndex])
+  console.log("Switch to RPC:", currentRpc());
+  return provider;
 }
-
+function currentRpc() {
+  return rpcProviders[currentRpcProviderIndex];
+}
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 const baseExplorerUrl = 'https://taikoscan.net';
@@ -53,4 +53,4 @@ async function ticker() {
     return 'Unknown';
   }
 }
-module.exports = { changeRpcProvider, provider, PRIVATE_KEY, explorer, ticker };
+module.exports = { changeRpcProvider, provider, PRIVATE_KEY, explorer, ticker, currentRpc };
