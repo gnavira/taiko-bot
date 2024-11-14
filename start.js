@@ -1,10 +1,10 @@
 const { ethers } = require('ethers');
 const chains = require('./chains');
-let provider = chains.mainnet.taiko.provider();
-const changeProvider = chains.mainnet.taiko.changeRpcProvider();
+const provider = chains.mainnet.taiko.provider;
+const changeProvider = chains.mainnet.taiko.changeRpcProvider;
 const explorer = chains.mainnet.taiko.explorer;
-const changeRpc = chains.mainnet.tempTaiko.changeRpcProvider();
-let tempProvider = chains.mainnet.tempTaiko.provider();
+const changeRpc = chains.mainnet.tempTaiko.changeRpcProvider;
+const tempProvider = chains.mainnet.tempTaiko.provider;
 const fs = require('fs');
 const moment = require('moment-timezone');
 const { displayHeader, delay } = require('./chains/utils/utils');
@@ -15,41 +15,34 @@ const SEND_CA = '0x2A5b0a407828b6Ca2E87e2e568CD8413fd5c24A1';
 const recipientsaddress = JSON.parse(fs.readFileSync('recipients.json', 'utf8'));
 const { CronJob } = require('cron');
 const amountCheck = ethers.parseEther('1', 'ether');
-const gasPrice = ethers.parseUnits('0.19', 'gwei');
-const readline = require('readline');
+const defaultgasPrice = ethers.parseUnits('0.19', 'gwei');
+async function getRoundedGasPrice(provider, defaultGasPrice) {
+  try {
+    let feeData = await provider.getFeeData();
+    let gasPrice = feeData.gasPrice;
+    
+    if (!gasPrice) throw new Error("Gas price not available");
 
+    let gasPriceRounded = ethers.parseUnits(
+      (Math.ceil(ethers.formatUnits(gasPrice, 'gwei') * 100) / 100).toString(),
+      'gwei'
+    );
+
+    console.log(`Gas price: ${ethers.formatUnits(gasPriceRounded, 'gwei')} gwei`.green);
+    return gasPriceRounded;
+  } catch (error) {
+    console.log(`Error: ${error.message}. Using default gas price ${ethers.formatUnits(defaultGasPrice, 'gwei')} gwei`);
+    return defaultGasPrice;
+  }
+}
 function appendLog(message) {
   fs.appendFileSync('log.txt', message + '\n');
-}
-async function switchProvider() {
-  console.log(`Beralih ke penyedia RPC baru...`);
-  tempProvider = changeRpc; // Memperbarui penyedia
-
-  // Tambahkan log untuk memeriksa apakah penyedia baru valid
-  if (tempProvider && tempProvider.connection && tempProvider.connection.url) {
-    console.log(`Menggunakan RPC: ${tempProvider.connection.url}`);
-  } else {
-    console.error(`Error: Penyedia RPC baru tidak valid.`);
-  }
-
-  await delay(5000); // Beri sedikit waktu untuk stabil
-}
-async function switchRpc() {
-  console.log(`Beralih ke penyedia RPC baru...`);
-  provider = changeProvider; // Memperbarui penyedia
-  if (provider && provider.connection && provider.connection.url) {
-    console.log(`Menggunakan RPC: ${provider.connection.url}`);
-  } else {
-    console.error(`Error: Penyedia RPC baru tidak valid.`);
-  }
-
-  await delay(5000); // Beri sedikit waktu untuk stabil
 }
 
 function isTimeoutError(error) {
   return error.message.includes('504 Gateway Timeout') || 
          error.message.includes('request timeout') || 
-         error.message.includes('failed to detect network') || 
+         error.message.includes('failed to detect network') ||
          error.message.includes('free limit') || 
          error.message.includes('constant variable');
 }
@@ -74,7 +67,7 @@ async function checkWethBalance(privateKey) {
     } catch (error) {
       if (isTimeoutError(error)) {
         console.log(`Kesalahan timeout terjadi: ${error.message}`);
-        await switchProvider();
+        await changeRpc();
         continue;
       }
       const errorMessage = `Kesalahan memeriksa saldo: ${error.message}`;
@@ -92,15 +85,16 @@ async function checkWethBalance(privateKey) {
 async function doWrap(privateKey) {
   const wallet = new ethers.Wallet(privateKey, provider);
   const amount = ethers.parseUnits('1.5', 'ether');
-  const maxRetries = 3; // Maximum number of retries
+  const maxRetries = 3;
   let attempt = 0;
 
   while (attempt < maxRetries) {
     try {
+      const gasPrice = await getRoundedGasPrice(provider, defaultgasPrice);
       const wrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
       const txWrap = await wrapContract.deposit({ value: amount, gasPrice: gasPrice });
       const receipt = await txWrap.wait(1);
-      return receipt.hash; // Return the transaction hash on success
+      return receipt.hash;
     } catch (error) {
       attempt++;
       const errorMessage = `[$timezone] Error executing Wrap transaction (Attempt ${attempt}/${maxRetries}): ${error.message}`;
@@ -109,30 +103,35 @@ async function doWrap(privateKey) {
       if (attempt < maxRetries && (error.message.includes('insufficient funds') || 
           error.message.includes('nonce has already') ||
           error.message.includes('Gateway Timeout') ||
+          error.message.includes('failed to detect network') ||
+		  error.message.includes('request timeout') ||
+		  error.message.includes('free limit') ||
           error.message.includes('missing revert data'))) {
         console.log(`Retrying transaction after delay...`);
         await delay(20000);
-        await switchRpc();
+        await changeProvider();
       } else {
-        throw error; // Re-throw the error for other issues or if max retries reached
+        throw error;
       }
     }
   }
 
-  throw new Error(`Exceeded maximum retries for Wrap transaction.`); // Throw an error if all retries failed
+  throw new Error(`Exceeded maximum retries for Wrap transaction.`);
 }
+
 async function doUnwrap(privateKey) {
   const wallet = new ethers.Wallet(privateKey, provider);
   const amount = ethers.parseUnits('1.5', 'ether');
-  const maxRetries = 3; // Maximum number of retries
+  const maxRetries = 3;
   let attempt = 0;
 
   while (attempt < maxRetries) {
     try {
+      const gasPrice = await getRoundedGasPrice(provider, defaultgasPrice);
       const unwrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
       const txUnwrap = await unwrapContract.withdraw(amount, { gasPrice: gasPrice });
       const receipt = await txUnwrap.wait(1);
-      return receipt.hash; // Return the transaction hash on success
+      return receipt.hash;
     } catch (error) {
       attempt++;
       const errorMessage = `[$timezone] Error executing Unwrap transaction (Attempt ${attempt}/${maxRetries}): ${error.message}`;
@@ -141,10 +140,13 @@ async function doUnwrap(privateKey) {
       if (attempt < maxRetries && (error.message.includes('insufficient funds') || 
           error.message.includes('nonce has already') ||
           error.message.includes('Gateway Timeout') ||
+          error.message.includes('failed to detect network') ||
+		  error.message.includes('request timeout') ||
+		  error.message.includes('free limit') ||
           error.message.includes('missing revert data'))) {
         console.log(`Retrying transaction after delay...`);
         await delay(20000);
-        await switchRpc();
+        await changeProvider();
       } else {
         throw error;
       }
@@ -159,14 +161,15 @@ async function doSendEther(privateKey) {
   const recipients = recipientsaddress;
   const values = recipients.map(() => ethers.parseUnits('1.5', 'ether'));
   const sendContract = new ethers.Contract(SEND_CA, SEND_ABI, wallet);
-  const maxRetries = 3; // Maximum number of retries
+  const maxRetries = 3;
   let attempt = 0;
 
   while (attempt < maxRetries) {
     try {
+      const gasPrice = await getRoundedGasPrice(provider, defaultgasPrice);
       const txSendContract = await sendContract.multicall(recipients, values, { value: ethers.parseUnits('1.5', 'ether'), gasPrice: gasPrice });
       const receipt = await txSendContract.wait(1);
-      return receipt.hash; // Return the transaction hash on success
+      return receipt.hash;
     } catch (error) {
       attempt++;
       const errorMessage = `[$timezone] Error executing Send ETH transaction (Attempt ${attempt}/${maxRetries}): ${error.message}`;
@@ -175,17 +178,20 @@ async function doSendEther(privateKey) {
       if (attempt < maxRetries && (error.message.includes('insufficient funds') || 
           error.message.includes('nonce has already') ||
           error.message.includes('Gateway Timeout') ||
+          error.message.includes('failed to detect network') ||
+		  error.message.includes('request timeout') ||
+		  error.message.includes('free limit') ||
           error.message.includes('missing revert data'))) {
         console.log(`Retrying transaction after delay...`);
         await delay(20000);
-        await switchRpc();
+        await changeProvider();
       } else {
-        throw error; // Re-throw the error for other issues or if max retries reached
+        throw error;
       }
     }
   }
 
-  throw new Error(`Exceeded maximum retries for Send ETH transaction.`); // Throw an error if all retries failed
+  throw new Error(`Exceeded maximum retries for Send ETH transaction.`);
 }
 async function checkBalance(privateKey) {
   const wallet = new ethers.Wallet(privateKey, tempProvider);
@@ -206,7 +212,7 @@ async function checkBalance(privateKey) {
     } catch (error) {
       if (isTimeoutError(error)) {
         console.log(`Kesalahan timeout terjadi: ${error.message}`);
-        await switchProvider();
+        await changeRpc();
         continue;
       }
       const errorMessage = `Kesalahan memeriksa saldo: ${error.message}`;
@@ -240,7 +246,7 @@ async function checkBalanceDeposit(privateKey) {
     } catch (error) {
       if (isTimeoutError(error)) {
         console.log(`Kesalahan timeout terjadi: ${error.message}`);
-        await switchProvider();
+        await changeRpc();
         continue;
       }
       const errorMessage = `Kesalahan memeriksa saldo: ${error.message}`;
@@ -262,7 +268,7 @@ async function runWrapandUnwrap() {
     try {
       let balance = await checkBalance(PRIVATE_KEY);
       await delay(5000);
-      for (let i = 0; i < 15; i++) {
+      for (let i = 0; i < 10; i++) {
         const txMessage = `Transaction Wrap and Unwrap`;
         console.log(txMessage);
         appendLog(txMessage);
@@ -306,35 +312,7 @@ async function runWrapandUnwrap() {
     }
   }
  }
-function askCronSchedule() {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-
-  return new Promise((resolve) => {
-    rl.question('Masukkan menit dan jam (misal: "0 1"): ', (input) => {
-      rl.close();
-      const [minutes, hours] = input.split(' ');
-      // Buat ekspresi cron lengkap
-      const cronSchedule = `${minutes} ${hours} * * *`;
-      resolve(cronSchedule);
-    });
-  });
-}
-
-async function main() {
-  const cronSchedule = await askCronSchedule();
-  console.log(`Transaksi akan dijalan kan pada: ${cronSchedule}`);
-
-  const job = new CronJob(
-    cronSchedule,
-    runWrapandUnwrap,
-    null,
-    true,
-    'UTC'
-  );
-
-  job.start();
-}
-main();
+const job = new CronJob('0 1 * * *', runWrapandUnwrap, null, true, 'UTC'); console.log('Transaksi akan dijalankan setiap 01:00 UTC');
+  
+job.start();
+runWrapandUnwrap();
