@@ -2,7 +2,7 @@ const { ethers } = require('ethers');
 const readline = require('readline');
 const fs = require('fs');
 const moment = require('moment-timezone');
-const { delay, appendLog } = require('./chains/utils/utils');
+const { delay } = require('./chains/utils/utils');
 const chains = require('./chains');
 const provider = chains.mainnet.taiko.provider;
 
