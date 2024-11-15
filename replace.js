@@ -104,7 +104,7 @@ async function startTransaction() {
         txHash = await doSendEther(privateKey, gasPrice, nonce);
       }
 
-      console.log(`Transaksi berhasil! Hash: https://taikoscan.net?tx/${txHash}`);
+      console.log(`Transaksi berhasil! Hash: https://taikoscan.net/tx/${txHash}`);
       appendLog(`Transaksi ${transactionType}: ${txHash}`);
       
     }
