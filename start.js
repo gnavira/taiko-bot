@@ -18,22 +18,22 @@ const amountCheck = ethers.parseEther('1', 'ether');
 const defaultgasPrice = ethers.parseUnits('0.19', 'gwei');
 async function getRoundedGasPrice(provider, defaultGasPrice) {
   try {
-    let feeData = await provider.getFeeData();
+    // Mendapatkan data gas fee
+    const feeData = await provider.getFeeData();
     let gasPrice = feeData.gasPrice;
-
     if (!gasPrice) throw new Error("Gas price tidak tersedia");
-
-    let gasPriceInGwei = ethers.formatUnits(gasPrice, 'gwei');
-    
-    // Set harga gas minimal 0.15 Gwei
-    if (parseFloat(gasPriceInGwei) < 0.15) {
-      gasPriceInGwei = '0.15';
+    let gasPriceInGwei = parseFloat(ethers.formatUnits(gasPrice, "gwei"));
+    if (gasPriceInGwei < 0.15) {
+      gasPriceInGwei = 0.15;
+    } else {
+      gasPriceInGwei = Math.ceil(gasPriceInGwei * 100) / 100;
     }
+    const getRoundedGasPrice = ethers.parseUnits(gasPriceInGwei.toString(), "gwei");
+    console.log(`Gas price: ${gasPriceInGwei} gwei`);
+    return getRoundedGasPrice;
 
-    let gasPriceRounded = ethers.parseUnits(gasPriceInGwei, 'gwei');
-    return gasPriceRounded;
   } catch (error) {
-    console.log(`Error: ${error.message}. Menggunakan harga gas default ${ethers.formatUnits(defaultGasPrice, 'gwei')} gwei`);
+    console.log(`Error mendapatkan gas price: ${error.message}. Menggunakan default gas price ${ethers.formatUnits(defaultGasPrice, "gwei")} gwei`);
     return defaultGasPrice;
   }
 }
