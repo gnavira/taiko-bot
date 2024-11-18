@@ -10,7 +10,6 @@ def update_file(file_path):
             "const amount = ethers.parseUnits('1.5', 'ether');",
             "const amount = ethers.parseUnits('1', 'ether');"
         )
-
         file_content = file_content.replace(
             "const values = recipients.map(() => ethers.parseUnits('1.5', 'ether'));",
             "const values = recipients.map(() => ethers.parseUnits('1', 'ether'));"
