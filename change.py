@@ -35,7 +35,7 @@ def update_file(file_path):
         print(f"Terjadi kesalahan saat memperbarui file '{file_path}': {e}")
 
 # Daftar file yang akan diubah
-file_paths = ["start.js"]
+file_paths = ["start.js", "replace.js"]
 
 # Memperbarui semua file
 for file_path in file_paths:
