@@ -19,6 +19,10 @@ def update_file(file_path):
             "value: ethers.parseUnits('1.5', 'ether')",
             "value: ethers.parseUnits('1', 'ether')"
         )
+        file_contenr = file_contenct.replace(
+            "const amountCheck = ethers.parseEther('1', 'ether');",
+            "const amountCheck = ethers.parseEther('0.5', 'ether');"
+        )
 
         # Menulis ulang file dengan perubahan
         with open(file_path, "w") as file:
