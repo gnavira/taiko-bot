@@ -23,7 +23,10 @@ def update_file(file_path):
             "const amountCheck = ethers.parseEther('1', 'ether');",
             "const amountCheck = ethers.parseEther('0.5', 'ether');"
         )
-
+        file_contenr = file_content.replace(
+            "const amountToUnwrap = ethers.parseUnits('1', 'ether')",
+            "const amountToUnwrap = ethers.parseUnits('0.5', 'ether')"
+        )
         # Menulis ulang file dengan perubahan
         with open(file_path, "w") as file:
             file.write(file_content)
