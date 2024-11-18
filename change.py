@@ -18,11 +18,11 @@ def update_file(file_path):
             "value: ethers.parseUnits('1.5', 'ether')",
             "value: ethers.parseUnits('1', 'ether')"
         )
-        file_contenr = file_content.replace(
+        file_content = file_content.replace(
             "const amountCheck = ethers.parseEther('1', 'ether');",
             "const amountCheck = ethers.parseEther('0.5', 'ether');"
         )
-        file_contenr = file_content.replace(
+        file_content = file_content.replace(
             "const amountToUnwrap = ethers.parseUnits('1', 'ether')",
             "const amountToUnwrap = ethers.parseUnits('0.5', 'ether')"
         )
