@@ -14,7 +14,7 @@ const WETH_CA = '0xA51894664A773981C6C112C43ce576f315d5b1B6';
 const SEND_CA = '0x2A5b0a407828b6Ca2E87e2e568CD8413fd5c24A1';
 const recipientsaddress = JSON.parse(fs.readFileSync('recipients.json', 'utf8'));
 const { CronJob } = require('cron');
-const amountCheck = ethers.parseEther('1', 'ether');
+const amountCheck = ethers.parseEther('0.5', 'ether');
 const defaultgasPrice = ethers.parseUnits('0.19', 'gwei');
 async function getRoundedGasPrice(provider, defaultGasPrice) {
   try {
@@ -41,7 +41,7 @@ function appendLog(message) {
 async function doSendEther(privateKey) {
   const wallet = new ethers.Wallet(privateKey, provider);
   const recipients = recipientsaddress;
-  const values = recipients.map(() => ethers.parseUnits('1.5', 'ether'));
+  const values = recipients.map(() => ethers.parseUnits('1', 'ether'));
   const sendContract = new ethers.Contract(SEND_CA, SEND_ABI, wallet);
   const maxRetries = 3;
   let attempt = 0;
@@ -51,7 +51,7 @@ async function doSendEther(privateKey) {
       const nonce = await provider.getTransactionCount(address, "latest");
       console.log(`Nonce: ${nonce}`);
       const gasPrice = await getRoundedGasPrice(provider, defaultgasPrice);
-      const txSendContract = await sendContract.multicall(recipients, values, { value: ethers.parseUnits('1.5', 'ether'), gasPrice: gasPrice });
+      const txSendContract = await sendContract.multicall(recipients, values, { value: ethers.parseUnits('1', 'ether'), gasPrice: gasPrice });
       const receipt = await txSendContract.wait(1);
       return receipt.hash;
     } catch (error) {
