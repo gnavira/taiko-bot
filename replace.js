@@ -2,7 +2,7 @@ const { ethers } = require('ethers');
 const readline = require('readline');
 const fs = require('fs');
 const moment = require('moment-timezone');
-const { delay } = require('./chains/utils/utils');
+const { displayHeader, delay } = require('./chains/utils/utils');
 const chains = require('./chains');
 const provider = chains.mainnet.taiko.provider;
 
@@ -25,7 +25,7 @@ const askQuestion = (question) => {
 };
 async function checkPendingNonce(walletAddress) {
   try {
-    const pendingNonce = await provider.getTransactionCount(walletAddress, 'pending');
+    const pendingNonce = await provider.getTransactionCount(walletAddress, 'latest');
     console.log(`Nonce yang sedang pending: ${pendingNonce}`);
     return pendingNonce;
   } catch (error) {
@@ -47,12 +47,10 @@ async function showMenu() {
 }
 async function startTransaction() {
   try {
-    // Pilih private key (untuk kemudahan, hanya menggunakan private key pertama)
+    displayHeader();
     const privateKey = PRIVATE_KEYS[0];
     const wallet = new ethers.Wallet(privateKey, provider);
     const walletAddress = wallet.address;
-
-    // Periksa nonce yang sedang pending
     const pendingNonce = await checkPendingNonce(walletAddress);
     if (pendingNonce === null) {
       console.log('Tidak dapat memeriksa nonce pending. Membatalkan proses...');
@@ -60,7 +58,6 @@ async function startTransaction() {
     }
 
     while (true) {
-      // Tampilkan menu pilihan
       const transactionChoice = await showMenu();
 
       if (transactionChoice === '0') {
@@ -68,8 +65,6 @@ async function startTransaction() {
         rl.close();
         return; // Exit
       }
-
-      // Pilih jenis transaksi berdasarkan pilihan
       const transactionType = transactionChoice === '1' ? 'doWrap' :
                              transactionChoice === '2' ? 'doUnwrap' :
                              transactionChoice === '3' ? 'doSendEther' :
@@ -116,7 +111,7 @@ async function startTransaction() {
 }
 async function doWrap(privateKey, gasPrice, nonce) {
   const wallet = new ethers.Wallet(privateKey, provider);
-  const amount = ethers.parseUnits('1.5', 'ether');
+  const amount = ethers.parseUnits('1', 'ether');
   
   try {
     const wrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
@@ -132,7 +127,7 @@ async function doWrap(privateKey, gasPrice, nonce) {
 // Fungsi untuk melakukan transaksi Unwrap
 async function doUnwrap(privateKey, gasPrice, nonce) {
   const wallet = new ethers.Wallet(privateKey, provider);
-  const amount = ethers.parseUnits('1.5', 'ether');
+  const amount = ethers.parseUnits('1', 'ether');
 
   try {
     const unwrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
@@ -148,11 +143,11 @@ async function doUnwrap(privateKey, gasPrice, nonce) {
 async function doSendEther(privateKey, gasPrice, nonce) {
   const wallet = new ethers.Wallet(privateKey, provider);
   const recipients = JSON.parse(fs.readFileSync('recipients.json', 'utf8'));
-  const values = recipients.map(() => ethers.parseUnits('1.5', 'ether'));
+  const values = recipients.map(() => ethers.parseUnits('1', 'ether'));
   
   try {
     const sendContract = new ethers.Contract(SEND_CA, SEND_ABI, wallet);
-    const txSendContract = await sendContract.multicall(recipients, values, { value: ethers.parseUnits('1.5', 'ether'), gasPrice, nonce });
+    const txSendContract = await sendContract.multicall(recipients, values, { value: ethers.parseUnits('1', 'ether'), gasPrice, nonce });
     const receipt = await txSendContract.wait(1);
     return receipt.hash;
   } catch (error) {
