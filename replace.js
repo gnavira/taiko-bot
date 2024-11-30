@@ -5,7 +5,6 @@ const moment = require('moment-timezone');
 const { displayHeader, delay } = require('./chains/utils/utils');
 const chains = require('./chains');
 const provider = chains.mainnet.taiko.provider;
-
 const PRIVATE_KEYS = JSON.parse(fs.readFileSync('privateKeys.json', 'utf-8'));
 const WETH_CA = '0xA51894664A773981C6C112C43ce576f315d5b1B6';
 const SEND_CA = '0x2A5b0a407828b6Ca2E87e2e568CD8413fd5c24A1';
@@ -19,7 +18,6 @@ function appendLog(message) {
   fs.appendFileSync('logreplace.txt', message + '\n');
 }
 
-// Fungsi untuk menunggu input pengguna
 const askQuestion = (question) => {
   return new Promise((resolve) => rl.question(question, resolve));
 };
@@ -34,7 +32,6 @@ async function checkPendingNonce(walletAddress) {
   }
 }
 
-// Fungsi untuk menampilkan menu dan mendapatkan pilihan dari pengguna
 async function showMenu() {
   console.log("\nMenu Pilihan Transaksi:");
   console.log("1. doWrap");
@@ -74,16 +71,11 @@ async function startTransaction() {
         console.log('Pilihan tidak valid. Silakan pilih kembali.');
         continue;
       }
-
-      // Masukkan gasPrice
       const gasPriceInput = await askQuestion("Masukkan gasPrice (dalam gwei): ");
       const gasPrice = ethers.parseUnits(gasPriceInput, 'gwei');
       
-      // Masukkan nonce (gunakan nonce pending jika ada, atau nonce berikutnya)
       let nonceInput = await askQuestion("Masukkan nonce transaksi: ");
       let nonce = parseInt(nonceInput, 10);
-
-      // Jika tidak memasukkan nonce, gunakan nonce yang sedang pending atau berikutnya
       if (nonce === NaN) {
         nonce = pendingNonce;
         console.log(`Menggunakan nonce yang sedang pending: ${nonce}`);
@@ -98,10 +90,8 @@ async function startTransaction() {
       } else if (transactionType === 'doSendEther') {
         txHash = await doSendEther(privateKey, gasPrice, nonce);
       }
-
       console.log(`Transaksi berhasil! Hash: https://taikoscan.net/tx/${txHash}`);
       appendLog(`Transaksi ${transactionType}: ${txHash}`);
-      
     }
   } catch (error) {
     console.error('Error dalam melakukan transaksi:', error.message);
@@ -124,7 +114,6 @@ async function doWrap(privateKey, gasPrice, nonce) {
   }
 }
 
-// Fungsi untuk melakukan transaksi Unwrap
 async function doUnwrap(privateKey, gasPrice, nonce) {
   const wallet = new ethers.Wallet(privateKey, provider);
   const amount = ethers.parseUnits('1', 'ether');
@@ -156,5 +145,4 @@ async function doSendEther(privateKey, gasPrice, nonce) {
   }
 }
 
-// Memulai transaksi
 startTransaction();
