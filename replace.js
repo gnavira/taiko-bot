@@ -116,6 +116,7 @@ async function doWrap(privateKey, gasPrice, nonce) {
 
 async function doUnwrap(privateKey, gasPrice, nonce) {
   const wallet = new ethers.Wallet(privateKey, provider);
+  const address = await wallet.getAddress();
   try {
     const unwrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
     const amount = await unwrapContract.balanceOf(address);
