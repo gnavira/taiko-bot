@@ -118,7 +118,7 @@ async function doUnwrap(privateKey, gasPrice, nonce) {
   const wallet = new ethers.Wallet(privateKey, provider);
   try {
     const unwrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
-    const amount = await wethContract.balanceOf(address);
+    const amount = await unwrapContract.balanceOf(address);
     if (amount === 0n) {
       console.log(`[${Timestamp()}] No WETH to unwrap.`.yellow);
       return null;
