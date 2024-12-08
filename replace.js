@@ -116,10 +116,13 @@ async function doWrap(privateKey, gasPrice, nonce) {
 
 async function doUnwrap(privateKey, gasPrice, nonce) {
   const wallet = new ethers.Wallet(privateKey, provider);
-  const amount = ethers.parseUnits('1', 'ether');
-
   try {
     const unwrapContract = new ethers.Contract(WETH_CA, ABI, wallet);
+    const amount = await wethContract.balanceOf(address);
+    if (amount === 0n) {
+      console.log(`[${Timestamp()}] No WETH to unwrap.`.yellow);
+      return null;
+    }
     const txUnwrap = await unwrapContract.withdraw(amount, { gasPrice, nonce });
     const receipt = await txUnwrap.wait(1);
     return receipt.hash;
